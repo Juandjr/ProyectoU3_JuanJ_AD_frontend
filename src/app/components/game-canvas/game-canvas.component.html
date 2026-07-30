@@ -1,0 +1,17 @@
+<div class="game-container" [class.night]="dayNight === 'NIGHT'">
+  <canvas #gameCanvas width="1280" height="720" class="game-canvas"></canvas>
+  
+  <div class="game-controls">
+    <button class="btn-secondary" (click)="leaveGame()">Volver al menú</button>
+  </div>
+</div>
+
+<div class="game-over-modal" *ngIf="gameOver">
+  <div class="game-over-backdrop"></div>
+  <div class="game-over-card">
+    <h2>¡Moriste!</h2>
+    <p>{{ deathMessage }}</p>
+    <p>Puntuación final: <strong>{{ scoreAtDeath }}</strong></p>
+    <button class="btn boton-modal" (click)="leaveGame()">Volver al menú</button>
+  </div>
+</div>

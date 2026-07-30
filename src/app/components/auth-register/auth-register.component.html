@@ -1,0 +1,39 @@
+<div class="auth-container">
+  <div class="auth-box">
+    <header class="auth-header">
+      <h3>Registro de Usuario</h3>
+      <p class="subtitle">Crea tu cuenta para jugar</p>
+    </header>
+
+    <div *ngIf="message" class="alert" [class.success]="messageType === 'success'" [class.error]="messageType === 'error'">
+      <span>{{ message }}</span>
+      <button type="button" class="alert-close" (click)="closeMessage()">×</button>
+    </div>
+
+    <div class="input-group">
+      <label for="reg_username">Usuario</label>
+      <input id="reg_username" [(ngModel)]="username" placeholder="Crea un nombre de usuario" />
+    </div>
+
+    <div class="input-group">
+      <label for="reg_email">Correo</label>
+      <input id="reg_email" type="email" [(ngModel)]="email" placeholder="Correo electrónico" />
+    </div>
+
+    <div class="input-group">
+      <label for="reg_password">Contraseña</label>
+      <input id="reg_password" type="password" [(ngModel)]="password" placeholder="Crea una contraseña" />
+    </div>
+
+    <div class="input-group">
+      <label for="reg_password_confirm">Repetir contraseña</label>
+      <input id="reg_password_confirm" type="password" [(ngModel)]="passwordConfirm" placeholder="Repite la contraseña" />
+    </div>
+
+    <button class="btn btn-success" (click)="doRegister()">Registrar</button>
+    
+    <div class="switch-auth">
+      ¿Ya tienes una cuenta? <a href="javascript:void(0)" (click)="onLoginClick()">Inicia sesión aquí</a>
+    </div>
+  </div>
+</div>

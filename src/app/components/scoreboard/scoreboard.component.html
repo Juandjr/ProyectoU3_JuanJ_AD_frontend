@@ -1,0 +1,56 @@
+<section class="scoreboard-page">
+  <div class="scoreboard-panel">
+    <div class="scoreboard-actions">
+      <button class="back-button" (click)="back()">Volver al menú</button>
+    </div>
+
+    <header class="scoreboard-header">
+      <h2>Marcador</h2>
+      <p>Los mejores puntajes clasificados por dificultad</p>
+    </header>
+
+    <div class="difficulty-tabs">
+      <button class="tab-button easy" [class.active]="selectedDifficulty === 'EASY'" (click)="selectDifficulty('EASY')">
+        🟢 Fácil
+      </button>
+      <button class="tab-button medium" [class.active]="selectedDifficulty === 'MEDIUM'" (click)="selectDifficulty('MEDIUM')">
+        🟡 Intermedia
+      </button>
+      <button class="tab-button hard" [class.active]="selectedDifficulty === 'HARD'" (click)="selectDifficulty('HARD')">
+        🔴 Difícil
+      </button>
+    </div>
+
+    <div *ngIf="loading" class="scoreboard-loading only">
+      <p>Cargando resultados...</p>
+    </div>
+
+    <div *ngIf="errorMessage" class="scoreboard-error">
+      <p>{{ errorMessage }}</p>
+    </div>
+
+    <div *ngIf="!loading && !errorMessage && entries.length === 0" class="scoreboard-empty">
+      <p>No existen registros.</p>
+    </div>
+
+    <table *ngIf="!loading && !errorMessage && entries.length > 0" class="scoreboard-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Jugador</th>
+          <th>Puntos</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let entry of entries; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ entry.username || '---' }}</td>
+          <td>{{ entry.score }}</td>
+          <td>{{ entry.date ? (entry.date | date:'short') : '---' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+</section>

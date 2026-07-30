@@ -1,0 +1,158 @@
+<div class="start-screen">
+
+  <header class="game-header">
+    <h1 class="title">Resource Collector</h1>
+    <p class="subtitle">Sobrevive a la noche en comunidad</p>
+  </header>
+  
+  <div *ngIf="alertMsg" class="alert-banner">
+    <span>⚠️ {{ alertMsg }}</span>
+    <button (click)="alertMsg = ''">×</button>
+  </div>
+
+  <div class="content-layout">
+    <!-- Columna Izquierda: Selección de Salas -->
+    <div class="menu-column">
+      <div class="rooms-header">
+        <h2>Salas Disponibles</h2>
+        <button class="btn-create-room" (click)="showCreateModal = true">+ Crear Sala</button>
+      </div>
+      
+      <div class="rooms-list">
+        <div class="room-card" *ngFor="let room of rooms" [class.full]="room.currentPlayers >= room.maxPlayers">
+          <div class="room-info">
+            <div class="room-title">
+              <span class="room-badge" [class.public]="room.isPublic">{{ room.isPublic ? '🌐 Pública' : '🔒 Privada' }}</span>
+              <span class="room-badge diff-badge" [class.easy]="room.difficulty === 'EASY'" [class.medium]="room.difficulty === 'MEDIUM'" [class.hard]="room.difficulty === 'HARD'">
+                {{ room.difficulty === 'EASY' ? '🟢 Fácil' : (room.difficulty === 'HARD' ? '🔴 Difícil' : '🟡 Intermedia') }}
+              </span>
+              <span class="room-name">{{ room.name }}</span>
+              <span class="room-lock" *ngIf="room.hasPassword" title="Protegida con contraseña">🔑</span>
+            </div>
+            <span class="room-capacity" [class.full-text]="room.currentPlayers >= room.maxPlayers">
+              👥 {{ room.currentPlayers }} / {{ room.maxPlayers }} jugadores
+            </span>
+          </div>
+
+          <button class="btn-join" 
+                  [disabled]="room.currentPlayers >= room.maxPlayers || isJoining" 
+                  (click)="onJoinClick(room)">
+            {{ room.currentPlayers >= room.maxPlayers ? 'Llena' : 'Entrar' }}
+          </button>
+        </div>
+
+        <div class="no-rooms" *ngIf="rooms.length === 0">
+          Cargando salas...
+        </div>
+      </div>
+
+      <div class="menu-box">
+        <button class="menu-button leaderboard-button" (click)="onViewLeaderboard()">
+          🏆 Tabla de Puntuación
+        </button>
+      </div>
+    </div>
+    
+    <!-- Columna Derecha: Guía de Supervivencia -->
+    <div class="guide-column">
+      <div class="guide-card">
+        <h3>Guía de Supervivencia</h3>
+        <hr class="guide-divider" />
+        <ul class="guide-list">
+          <li>
+            <div class="guide-icon">🚪</div>
+            <div class="guide-text">
+              <strong>Salas Aisladas:</strong> Cada sala tiene su propia partida independiente. Entra a una sala pública o crea la tuya para jugar con amigos.
+            </div>
+          </li>
+          <li>
+            <div class="guide-icon">🌲</div>
+            <div class="guide-text">
+              <strong>Recolecta Recursos:</strong> Muévete por el mapa para recolectar los recursos de madera verde.
+            </div>
+          </li>
+          <li>
+            <div class="guide-icon">🔥</div>
+            <div class="guide-text">
+              <strong>Alimenta la Fogata:</strong> Acércate a la fogata central para depositar tus recursos. Si la fogata se apaga, la noche se volverá peligrosa.
+            </div>
+          </li>
+          <li>
+            <div class="guide-icon">👾</div>
+            <div class="guide-text">
+              <strong>Sobrevive a la Noche:</strong> Al anochecer aparecerán monstruos morados. La luz de la fogata es tu único escudo contra ellos.
+            </div>
+          </li>
+          <li>
+            <div class="guide-icon">🎮</div>
+            <div class="guide-text">
+              <strong>Controles de Movimiento:</strong> Usa las teclas <strong>W, A, S, D</strong> o las <strong>flechas del teclado</strong> para desplazarte.
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Crear Sala -->
+  <div class="modal-overlay" *ngIf="showCreateModal">
+    <div class="modal-card">
+      <h3>Crear Sala Personalizada</h3>
+      <p class="modal-sub">Define el nombre, capacidad y contraseña opcional</p>
+
+      <div class="form-group">
+        <label>Nombre de la Sala</label>
+        <input type="text" [(ngModel)]="newRoomName" placeholder="Ej: Sala de Supervivientes" maxlength="30" />
+      </div>
+
+      <div class="form-group">
+        <label>Capacidad Máxima (2 a 6 jugadores)</label>
+        <select [(ngModel)]="newRoomMax">
+          <option [ngValue]="2">2 Jugadores</option>
+          <option [ngValue]="3">3 Jugadores</option>
+          <option [ngValue]="4">4 Jugadores</option>
+          <option [ngValue]="5">5 Jugadores</option>
+          <option [ngValue]="6">6 Jugadores</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Dificultad</label>
+        <select [(ngModel)]="newRoomDifficulty">
+          <option value="EASY">🟢 Fácil (Enemigos lentos, fogata duradera, 10 pts/madera)</option>
+          <option value="MEDIUM">🟡 Intermedia (Equilibrado, 15 pts/madera)</option>
+          <option value="HARD">🔴 Difícil (Enemigos rápidos/múltiples, fogata rápida, 25 pts/madera)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Contraseña (opcional)</label>
+        <input type="password" [(ngModel)]="newRoomPassword" placeholder="Dejar vacío para sala sin contraseña" />
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="showCreateModal = false">Cancelar</button>
+        <button class="btn-confirm" [disabled]="isJoining" (click)="onCreateRoom()">Crear y Unirse</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Contraseña para Unirse -->
+  <div class="modal-overlay" *ngIf="showPasswordModal">
+    <div class="modal-card">
+      <h3>🔑 Sala Protegida</h3>
+      <p class="modal-sub">Esta sala requiere una contraseña para ingresar</p>
+
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" [(ngModel)]="joinPasswordInput" placeholder="Ingresa la contraseña" (keydown.enter)="onConfirmJoinPassword()" />
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="onCancelJoinPassword()">Cancelar</button>
+        <button class="btn-confirm" [disabled]="isJoining" (click)="onConfirmJoinPassword()">Entrar</button>
+      </div>
+    </div>
+  </div>
+
+</div>
