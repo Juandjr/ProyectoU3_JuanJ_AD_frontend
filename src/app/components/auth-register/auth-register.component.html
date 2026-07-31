@@ -30,7 +30,9 @@
       <input id="reg_password_confirm" type="password" [(ngModel)]="passwordConfirm" placeholder="Repite la contraseña" />
     </div>
 
-    <button class="btn btn-success" (click)="doRegister()">Registrar</button>
+    <button class="btn btn-success" (click)="doRegister()" [disabled]="isSubmitting">
+      {{ isSubmitting ? 'Registrando...' : 'Registrar' }}
+    </button>
     
     <div class="switch-auth">
       ¿Ya tienes una cuenta? <a href="javascript:void(0)" (click)="onLoginClick()">Inicia sesión aquí</a>

@@ -353,10 +353,11 @@ export class StoreComponent implements OnInit {
     this.isProcessingPayment = true;
     try {
       const endpoint = gateway === 'paypal' ? '/api/payments/paypal/create' : '/api/payments/payphone/create';
+      const frontendUrl = window.location.origin;
       const res = await fetch(`${this.apiUrl}${endpoint}`, {
         method: 'POST',
         headers: this.headers,
-        body: JSON.stringify({ packageId })
+        body: JSON.stringify({ packageId, frontendUrl })
       });
       const data = await res.json().catch(() => ({}));
       const errorMessage = typeof data?.error === 'string'

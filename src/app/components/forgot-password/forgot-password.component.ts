@@ -25,7 +25,9 @@ import { Router } from '@angular/router';
           <input id="email" [(ngModel)]="email" placeholder="Introduce tu correo registrado" />
         </div>
 
-        <button class="btn btn-primary" (click)="sendRequest()">Enviar Enlace</button>
+        <button class="btn btn-primary" (click)="sendRequest()" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Enviando...' : 'Enviar Enlace' }}
+        </button>
 
         <div class="switch-auth">
           ¿Recordaste tu contraseña? <a href="javascript:void(0)" (click)="onLoginClick()">Inicia sesión aquí</a>
@@ -37,18 +39,20 @@ import { Router } from '@angular/router';
 })
 export class ForgotPasswordComponent {
   private router = inject(Router);
-
   email = '';
   message = '';
   messageType: 'success' | 'error' = 'error';
+  isSubmitting = false;
 
   async sendRequest() {
+    if (this.isSubmitting) return;
     if (!this.email) {
       this.showAlert('Por favor, introduce tu correo electrónico.', 'error');
       return;
     }
 
     try {
+      this.isSubmitting = true;
       const apiUrl = (window as any).__env?.API_URL || 'http://localhost:3000';
       const frontendUrl = window.location.origin;
       const res = await fetch(`${apiUrl}/api/auth/forgot-password`, {
@@ -58,23 +62,15 @@ export class ForgotPasswordComponent {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Request failed');
-
       this.showAlert(data.message || 'Solicitud enviada correctamente. Revisa tu bandeja de entrada.', 'success');
     } catch (err: any) {
       this.showAlert(err && err.message ? err.message : String(err), 'error');
+    } finally {
+      this.isSubmitting = false;
     }
   }
 
-  onLoginClick() {
-    this.router.navigate(['/login']);
-  }
-
-  showAlert(message: string, type: 'success' | 'error' = 'error') {
-    this.message = message;
-    this.messageType = type;
-  }
-
-  closeMessage() {
-    this.message = '';
-  }
+  onLoginClick() { this.router.navigate(['/login']); }
+  showAlert(message: string, type: 'success' | 'error' = 'error') { this.message = message; this.messageType = type; }
+  closeMessage() { this.message = ''; }
 }

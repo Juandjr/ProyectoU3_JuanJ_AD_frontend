@@ -14,31 +14,21 @@ import { Router, ActivatedRoute } from '@angular/router';
           <h3>Verificación de Cuenta</h3>
           <p class="subtitle">Ingresa el código enviado a tu correo</p>
         </header>
-
         <div *ngIf="message" class="alert" [class.success]="messageType === 'success'" [class.error]="messageType === 'error'">
           <span>{{ message }}</span>
           <button type="button" class="alert-close" (click)="closeMessage()">×</button>
         </div>
-
         <div class="input-group">
           <label for="email">Correo Electrónico</label>
           <input id="email" [(ngModel)]="email" placeholder="tu@correo.com" [disabled]="emailLocked" />
         </div>
-
         <div class="input-group">
           <label for="code">Código de Verificación</label>
-          <input id="code" [(ngModel)]="code" placeholder="6 dígitos" maxlength="6" style="text-align: center; letter-spacing: 4px; font-size: 1.25rem;" />
+          <input id="code" [(ngModel)]="code" placeholder="6 dígitos" maxlength="6" style="text-align:center; letter-spacing:4px; font-size:1.25rem;" />
         </div>
-
-        <button class="btn btn-primary" (click)="doVerify()">Verificar Código</button>
-        
-        <button class="btn btn-secondary" style="margin-top: 1rem; border-radius: 999px;" (click)="resendCode()" [disabled]="resendDisabled">
-          {{ resendText }}
-        </button>
-
-        <div class="switch-auth">
-          ¿Ya tienes tu cuenta activa? <a href="javascript:void(0)" (click)="onLoginClick()">Inicia sesión aquí</a>
-        </div>
+        <button class="btn btn-primary" (click)="doVerify()" [disabled]="isSubmitting">{{ isSubmitting ? 'Verificando...' : 'Verificar Código' }}</button>
+        <button class="btn btn-secondary" style="margin-top:1rem; border-radius:999px;" (click)="resendCode()" [disabled]="resendDisabled || isSubmitting">{{ resendText }}</button>
+        <div class="switch-auth">¿Ya tienes tu cuenta activa? <a href="javascript:void(0)" (click)="onLoginClick()">Inicia sesión aquí</a></div>
       </div>
     </div>
   `,
@@ -47,7 +37,6 @@ import { Router, ActivatedRoute } from '@angular/router';
 export class AuthVerifyComponent {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-
   email = '';
   code = '';
   message = '';
@@ -55,6 +44,7 @@ export class AuthVerifyComponent {
   emailLocked = false;
   resendDisabled = false;
   resendText = 'Reenviar Código';
+  isSubmitting = false;
 
   constructor() {
     this.route.queryParams.subscribe(params => {
@@ -66,12 +56,10 @@ export class AuthVerifyComponent {
   }
 
   async doVerify() {
-    if (!this.email || !this.code) {
-      this.showAlert('Por favor, ingresa tu correo y el código recibido.', 'error');
-      return;
-    }
-
+    if (this.isSubmitting) return;
+    if (!this.email || !this.code) return this.showAlert('Por favor, ingresa tu correo y el código recibido.', 'error');
     try {
+      this.isSubmitting = true;
       const apiUrl = (window as any).__env?.API_URL || 'http://localhost:3000';
       const res = await fetch(`${apiUrl}/api/auth/verify-code`, {
         method: 'POST',
@@ -80,24 +68,21 @@ export class AuthVerifyComponent {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Verification failed');
-
       localStorage.setItem('jwt', data.token);
       this.showAlert('¡Cuenta activada correctamente! Redirigiendo...', 'success');
       setTimeout(() => this.router.navigate(['/start']), 1500);
     } catch (err: any) {
       this.showAlert(err && err.message ? err.message : String(err), 'error');
+    } finally {
+      this.isSubmitting = false;
     }
   }
 
   async resendCode() {
-    if (!this.email) {
-      this.showAlert('Por favor, ingresa tu correo primero.', 'error');
-      return;
-    }
-
+    if (this.isSubmitting || this.resendDisabled) return;
+    if (!this.email) return this.showAlert('Por favor, ingresa tu correo primero.', 'error');
     this.resendDisabled = true;
     this.resendText = 'Enviando...';
-
     try {
       const apiUrl = (window as any).__env?.API_URL || 'http://localhost:3000';
       const res = await fetch(`${apiUrl}/api/auth/resend-code`, {
@@ -107,9 +92,7 @@ export class AuthVerifyComponent {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Resend failed');
-
       this.showAlert('Se ha enviado un nuevo código a tu correo.', 'success');
-      
       let countdown = 30;
       const interval = setInterval(() => {
         countdown--;
@@ -128,16 +111,7 @@ export class AuthVerifyComponent {
     }
   }
 
-  onLoginClick() {
-    this.router.navigate(['/login']);
-  }
-
-  showAlert(message: string, type: 'success' | 'error' = 'error') {
-    this.message = message;
-    this.messageType = type;
-  }
-
-  closeMessage() {
-    this.message = '';
-  }
+  onLoginClick() { this.router.navigate(['/login']); }
+  showAlert(message: string, type: 'success' | 'error' = 'error') { this.message = message; this.messageType = type; }
+  closeMessage() { this.message = ''; }
 }

@@ -19,8 +19,10 @@ export class AuthRegisterComponent {
   passwordConfirm = '';
   message = '';
   messageType: 'success' | 'error' = 'error';
+  isSubmitting = false;
 
   async doRegister() {
+    if (this.isSubmitting) return;
     if (!this.username || !this.password || !this.email || !this.passwordConfirm) {
       this.showAlert('Por favor, llena todos los campos obligatorios.', 'error');
       return;
@@ -31,6 +33,7 @@ export class AuthRegisterComponent {
     }
 
     try {
+      this.isSubmitting = true;
       const apiUrl = (window as any).__env?.API_URL || 'http://localhost:3000';
       const res = await fetch(`${apiUrl}/api/auth/register`, {
         method: 'POST',
@@ -44,6 +47,8 @@ export class AuthRegisterComponent {
       setTimeout(() => this.router.navigate(['/verify'], { queryParams: { email: this.email } }), 1500);
     } catch (err: any) {
       this.showAlert('Error en registro: ' + (err && err.message ? err.message : String(err)), 'error');
+    } finally {
+      this.isSubmitting = false;
     }
   }
 
