@@ -50,10 +50,11 @@ export class ForgotPasswordComponent {
 
     try {
       const apiUrl = (window as any).__env?.API_URL || 'http://localhost:3000';
+      const frontendUrl = window.location.origin;
       const res = await fetch(`${apiUrl}/api/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: this.email })
+        body: JSON.stringify({ email: this.email, frontendUrl })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Request failed');
