@@ -23,17 +23,13 @@ export class AuthLoginComponent implements AfterViewInit {
   messageType: 'success' | 'error' = 'error';
 
   ngAfterViewInit() {
-    // Always start from a clean auth state so we do not reuse a stale token
-    // from another account and skip the MFA step.
     this.gameSocket.disconnect();
     clearJwt();
     this.initGoogleOAuth();
   }
 
   async initGoogleOAuth() {
-    if (this.googleInitialized) {
-      return;
-    }
+    if (this.googleInitialized) return;
 
     let attempts = 0;
     while (!(window as any).google && attempts < 30) {
@@ -49,19 +45,12 @@ export class AuthLoginComponent implements AfterViewInit {
     try {
       const apiUrl = (window as any).__env?.API_URL || 'http://localhost:3000';
       const configRes = await fetch(`${apiUrl}/api/auth/config`);
-      if (!configRes.ok) {
-        throw new Error('No se pudo cargar la configuración de Google OAuth');
-      }
+      if (!configRes.ok) throw new Error('No se pudo cargar la configuración de Google OAuth');
       const config = await configRes.json();
       const clientId = config.clientId;
 
       if (!clientId) {
-        console.error('Google client ID is not configured.');
         this.showAlert('Autenticación con Google no disponible: falta configuración del client ID.', 'error');
-        return;
-      }
-
-      if (this.googleInitialized) {
         return;
       }
 
@@ -94,6 +83,13 @@ export class AuthLoginComponent implements AfterViewInit {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Google Login failed');
+
+      if (data.requiresMfa) {
+        clearJwt();
+        this.router.navigate(['/login-mfa'], { queryParams: { email: data.email } });
+        return;
+      }
+
       localStorage.setItem('jwt', data.token);
       this.router.navigate(['/start']);
     } catch (err: any) {
@@ -130,20 +126,8 @@ export class AuthLoginComponent implements AfterViewInit {
     }
   }
 
-  onRegisterClick() {
-    this.router.navigate(['/register']);
-  }
-
-  onForgotPasswordClick() {
-    this.router.navigate(['/forgot-password']);
-  }
-
-  showAlert(message: string, type: 'success' | 'error' = 'error') {
-    this.message = message;
-    this.messageType = type;
-  }
-
-  closeMessage() {
-    this.message = '';
-  }
+  onRegisterClick() { this.router.navigate(['/register']); }
+  onForgotPasswordClick() { this.router.navigate(['/forgot-password']); }
+  showAlert(message: string, type: 'success' | 'error' = 'error') { this.message = message; this.messageType = type; }
+  closeMessage() { this.message = ''; }
 }
