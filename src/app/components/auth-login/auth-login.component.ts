@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { clearJwt } from '../../utils/auth-utils';
+import { GameSocketService } from '../../services/game-socket.service';
 
 @Component({
   selector: 'app-auth-login',
@@ -13,6 +14,7 @@ import { clearJwt } from '../../utils/auth-utils';
 })
 export class AuthLoginComponent implements AfterViewInit {
   private router = inject(Router);
+  private gameSocket = inject(GameSocketService);
   private googleInitialized = false;
 
   username = '';
@@ -23,6 +25,7 @@ export class AuthLoginComponent implements AfterViewInit {
   ngAfterViewInit() {
     // Always start from a clean auth state so we do not reuse a stale token
     // from another account and skip the MFA step.
+    this.gameSocket.disconnect();
     clearJwt();
     this.initGoogleOAuth();
   }

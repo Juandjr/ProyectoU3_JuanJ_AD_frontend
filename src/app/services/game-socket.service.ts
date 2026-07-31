@@ -12,19 +12,29 @@ export class GameSocketService {
   private socket!: Socket;
   private connected = false;
   private refreshTimerId: number | null = null;
+  private currentToken: string | null = null;
   private router = inject(Router);
 
   connect(): void {
-    if (this.socket && this.socket.connected) return;
     const token = localStorage.getItem('jwt');
     if (!isJwtValid(token)) {
       clearJwt();
+      this.disconnect();
       this.router.navigate(['/login']);
       return;
     }
 
+    if (this.socket && this.socket.connected && this.currentToken === token) {
+      return;
+    }
+
+    if (this.socket) {
+      this.disconnect();
+    }
+
     const url = (window as any).__env?.API_URL || 'http://localhost:3000';
     this.socket = io(url, { auth: { token } });
+    this.currentToken = token;
     this.connected = true;
 
     this.socket.on('connect', () => {
@@ -38,6 +48,7 @@ export class GameSocketService {
     this.socket.on('connect_error', (err: any) => {
       if (err && err.message && err.message.toLowerCase().includes('authentication')) {
         clearJwt();
+        this.disconnect();
         this.router.navigate(['/login']);
       }
     });
@@ -263,7 +274,10 @@ export class GameSocketService {
   disconnect(): void {
     if (this.socket) {
       try { this.socket.disconnect(); } catch (e) { /* ignore */ }
+      this.socket = undefined as any;
+      this.currentToken = null;
       this.connected = false;
+      this.stopTokenRefreshLoop();
     }
   }
 }
