@@ -73,6 +73,8 @@ export class PaymentCompleteComponent implements OnInit {
   async ngOnInit() {
     const gateway = this.route.snapshot.queryParamMap.get('gateway');
     const canceled = this.route.snapshot.queryParamMap.get('canceled') === '1';
+    const confirmed = this.route.snapshot.queryParamMap.get('confirmed') === '1';
+    const error = this.route.snapshot.queryParamMap.get('error');
     if (canceled) {
       this.status = 'error';
       this.title = 'Pago cancelado';
@@ -80,35 +82,33 @@ export class PaymentCompleteComponent implements OnInit {
       return;
     }
 
+    if (error) {
+      this.status = 'error';
+      this.title = 'Error al confirmar';
+      this.message = error;
+      return;
+    }
+
+    if (confirmed) {
+      this.status = 'success';
+      this.title = 'Pago confirmado';
+      this.message = 'Tus monedas fueron agregadas correctamente.';
+      return;
+    }
+
     try {
       const apiUrl = (window as any).__env?.API_URL || 'http://localhost:3000';
       if (gateway === 'paypal') {
-        const orderId = this.route.snapshot.queryParamMap.get('token') || this.route.snapshot.queryParamMap.get('orderId');
-        const res = await fetch(`${apiUrl}/api/payments/paypal/confirm`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orderId })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'No se pudo confirmar PayPal');
         this.status = 'success';
         this.title = 'Pago confirmado';
-        this.message = `Tus monedas fueron agregadas correctamente (${data.coinsAdded || 0}).`;
+        this.message = 'Tu pago de PayPal fue confirmado desde el backend.';
         return;
       }
 
       if (gateway === 'payphone') {
-        const tx = this.route.snapshot.queryParamMap.get('tx');
-        const res = await fetch(`${apiUrl}/api/payments/payphone/confirm`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tx })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'No se pudo confirmar PayPhone');
         this.status = 'success';
         this.title = 'Pago confirmado';
-        this.message = `Tus monedas fueron agregadas correctamente (${data.coinsAdded || 0}).`;
+        this.message = 'Tu pago de PayPhone fue confirmado desde el backend.';
         return;
       }
 

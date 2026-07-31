@@ -28,6 +28,9 @@ import { Router } from '@angular/router';
         <button class="btn btn-primary" (click)="sendRequest()" [disabled]="isSubmitting">
           {{ isSubmitting ? 'Enviando...' : 'Enviar Enlace' }}
         </button>
+        <button class="btn btn-secondary" style="margin-top: 1rem; border-radius: 999px;" (click)="resendRequest()" [disabled]="isSubmitting || !email">
+          Reenviar correo
+        </button>
 
         <div class="switch-auth">
           ¿Recordaste tu contraseña? <a href="javascript:void(0)" (click)="onLoginClick()">Inicia sesión aquí</a>
@@ -63,6 +66,32 @@ export class ForgotPasswordComponent {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Request failed');
       this.showAlert(data.message || 'Solicitud enviada correctamente. Revisa tu bandeja de entrada.', 'success');
+    } catch (err: any) {
+      this.showAlert(err && err.message ? err.message : String(err), 'error');
+    } finally {
+      this.isSubmitting = false;
+    }
+  }
+
+  async resendRequest() {
+    if (this.isSubmitting) return;
+    if (!this.email) {
+      this.showAlert('Ingresa primero tu correo.', 'error');
+      return;
+    }
+
+    try {
+      this.isSubmitting = true;
+      const apiUrl = (window as any).__env?.API_URL || 'http://localhost:3000';
+      const frontendUrl = window.location.origin;
+      const res = await fetch(`${apiUrl}/api/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: this.email, frontendUrl })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Request failed');
+      this.showAlert(data.message || 'Se reenviÃ³ el correo correctamente.', 'success');
     } catch (err: any) {
       this.showAlert(err && err.message ? err.message : String(err), 'error');
     } finally {
