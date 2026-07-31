@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -12,7 +12,6 @@ import { ActivatedRoute, Router } from '@angular/router';
         <div class="icon">{{ status === 'success' ? '✓' : status === 'error' ? '!' : '…' }}</div>
         <h1>{{ title }}</h1>
         <p>{{ message }}</p>
-        <button *ngIf="status !== 'pending'" (click)="goToStore()">Volver a la tienda</button>
       </div>
     </div>
   `,
@@ -50,77 +49,77 @@ import { ActivatedRoute, Router } from '@angular/router';
     }
     .payment-card.err .icon { background: rgba(248,113,113,.12); color: #fca5a5; }
     h1 { margin: 0 0 .5rem; font-size: 1.6rem; }
-    p { color: #a2b4c1; margin: 0 0 1.5rem; }
-    button {
-      border: none;
-      border-radius: 999px;
-      padding: .85rem 1.3rem;
-      background: #7fffd4;
-      color: #1a262f;
-      font-weight: 800;
-      cursor: pointer;
-    }
+    p { color: #a2b4c1; margin: 0; }
   `]
 })
-export class PaymentCompleteComponent implements OnInit {
+export class PaymentCompleteComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private closeTimer: number | null = null;
 
   status: 'pending' | 'success' | 'error' = 'pending';
   title = 'Confirmando pago';
   message = 'Estamos verificando tu transacción. No cierres esta ventana todavía.';
 
-  async ngOnInit() {
+  ngOnInit(): void {
     const gateway = this.route.snapshot.queryParamMap.get('gateway');
     const canceled = this.route.snapshot.queryParamMap.get('canceled') === '1';
     const confirmed = this.route.snapshot.queryParamMap.get('confirmed') === '1';
     const error = this.route.snapshot.queryParamMap.get('error');
+
     if (canceled) {
-      this.status = 'error';
-      this.title = 'Pago cancelado';
-      this.message = 'La transacción fue cancelada.';
+      this.setState('error', 'Pago cancelado', 'La transacción fue cancelada.');
       return;
     }
 
     if (error) {
-      this.status = 'error';
-      this.title = 'Error al confirmar';
-      this.message = error;
+      this.setState('error', 'Error al confirmar', error);
       return;
     }
 
-    if (confirmed) {
-      this.status = 'success';
-      this.title = 'Pago confirmado';
-      this.message = 'Tus monedas fueron agregadas correctamente.';
+    if (confirmed || gateway === 'paypal' || gateway === 'payphone') {
+      const message = gateway === 'paypal'
+        ? 'Tu pago de PayPal fue confirmado correctamente.'
+        : gateway === 'payphone'
+          ? 'Tu pago de PayPhone fue confirmado correctamente.'
+          : 'Tus monedas fueron agregadas correctamente.';
+      this.setState('success', 'Pago confirmado', message);
       return;
     }
 
-    try {
-      const apiUrl = (window as any).__env?.API_URL || 'http://localhost:3000';
-      if (gateway === 'paypal') {
-        this.status = 'success';
-        this.title = 'Pago confirmado';
-        this.message = 'Tu pago de PayPal fue confirmado desde el backend.';
-        return;
-      }
+    this.setState('error', 'Error al confirmar', 'No se pudo identificar la transacción.');
+  }
 
-      if (gateway === 'payphone') {
-        this.status = 'success';
-        this.title = 'Pago confirmado';
-        this.message = 'Tu pago de PayPhone fue confirmado desde el backend.';
-        return;
-      }
-
-      throw new Error('Pasarela desconocida');
-    } catch (err: any) {
-      this.status = 'error';
-      this.title = 'Error al confirmar';
-      this.message = err?.message || 'No se pudo completar la verificación del pago.';
+  ngOnDestroy(): void {
+    if (this.closeTimer !== null) {
+      window.clearTimeout(this.closeTimer);
+      this.closeTimer = null;
     }
   }
 
-  goToStore() {
-    this.router.navigate(['/store']);
+  private setState(status: 'success' | 'error', title: string, message: string): void {
+    this.status = status;
+    this.title = title;
+    this.message = message;
+    this.scheduleClose();
+  }
+
+  private scheduleClose(): void {
+    if (this.closeTimer !== null) {
+      window.clearTimeout(this.closeTimer);
+    }
+
+    this.closeTimer = window.setTimeout(() => {
+      try {
+        if (window.opener && !window.opener.closed) {
+          window.close();
+          return;
+        }
+      } catch {
+        // Ignore cross-window access errors and fall back to routing.
+      }
+
+      this.router.navigate(['/store']);
+    }, 2500);
   }
 }
