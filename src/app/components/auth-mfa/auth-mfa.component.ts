@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { clearJwt } from '../../utils/auth-utils';
 
 @Component({
   selector: 'app-auth-mfa',
@@ -196,6 +197,7 @@ export class AuthMfaComponent {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Código inválido');
+      clearJwt();
       localStorage.setItem('jwt', data.token);
       this.router.navigate(['/start']);
     } catch (err: any) {

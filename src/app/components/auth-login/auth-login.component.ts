@@ -2,6 +2,7 @@ import { Component, AfterViewInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { clearJwt } from '../../utils/auth-utils';
 
 @Component({
   selector: 'app-auth-login',
@@ -12,6 +13,7 @@ import { Router } from '@angular/router';
 })
 export class AuthLoginComponent implements AfterViewInit {
   private router = inject(Router);
+  private googleInitialized = false;
 
   username = '';
   password = '';
@@ -19,11 +21,17 @@ export class AuthLoginComponent implements AfterViewInit {
   messageType: 'success' | 'error' = 'error';
 
   ngAfterViewInit() {
+    // Always start from a clean auth state so we do not reuse a stale token
+    // from another account and skip the MFA step.
+    clearJwt();
     this.initGoogleOAuth();
   }
 
   async initGoogleOAuth() {
-    // Esperar a que la librería 'google' de Google Identity Services esté disponible en window
+    if (this.googleInitialized) {
+      return;
+    }
+
     let attempts = 0;
     while (!(window as any).google && attempts < 30) {
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -50,10 +58,15 @@ export class AuthLoginComponent implements AfterViewInit {
         return;
       }
 
+      if (this.googleInitialized) {
+        return;
+      }
+
       (window as any).google.accounts.id.initialize({
         client_id: clientId,
         callback: this.handleGoogleCredential.bind(this)
       });
+      this.googleInitialized = true;
 
       const googleBtnEl = document.getElementById('googleBtn');
       if (googleBtnEl) {
@@ -102,6 +115,7 @@ export class AuthLoginComponent implements AfterViewInit {
       if (!res.ok) throw new Error(data.error || 'Login failed');
 
       if (data.requiresMfa) {
+        clearJwt();
         this.router.navigate(['/login-mfa'], { queryParams: { email: data.email } });
         return;
       }
