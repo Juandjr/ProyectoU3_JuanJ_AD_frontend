@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -15,7 +15,22 @@ import { clearJwt } from '../../utils/auth-utils';
 
         <!-- Header -->
         <div class="profile-header">
-          <div class="avatar-circle">{{ user.username[0]?.toUpperCase() }}</div>
+          <button type="button" class="avatar-button" (click)="openAvatarPicker()" [disabled]="uploadingAvatar" title="Cambiar foto de perfil">
+            <ng-container *ngIf="user.avatarUrl; else avatarFallback">
+              <img [src]="user.avatarUrl" [alt]="user.username" class="avatar-image" />
+            </ng-container>
+            <ng-template #avatarFallback>
+              <div class="avatar-circle">{{ user.username[0]?.toUpperCase() }}</div>
+            </ng-template>
+            <div class="avatar-overlay">{{ uploadingAvatar ? 'Subiendo...' : 'Cambiar foto' }}</div>
+          </button>
+          <input
+            #avatarInput
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+            class="avatar-input"
+            (change)="onAvatarSelected($event)"
+          />
           <div class="user-info">
             <h1>{{ user.username }}</h1>
             <p class="user-email">{{ user.email }}</p>
@@ -163,6 +178,24 @@ import { clearJwt } from '../../utils/auth-utils';
       padding: 1.75rem 2rem;
     }
 
+    .avatar-button {
+      position: relative;
+      width: 72px;
+      height: 72px;
+      border: none;
+      padding: 0;
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .avatar-button:disabled {
+      cursor: progress;
+      opacity: 0.85;
+    }
+
     .avatar-circle {
       width: 72px; height: 72px;
       border-radius: 50%;
@@ -170,6 +203,42 @@ import { clearJwt } from '../../utils/auth-utils';
       display: flex; align-items: center; justify-content: center;
       font-size: 2rem; font-weight: 800; color: #1a262f;
       flex-shrink: 0;
+    }
+
+    .avatar-image {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      border: 2px solid rgba(127, 255, 212, 0.35);
+    }
+
+    .avatar-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(26, 38, 47, 0.55);
+      color: #f8fafc;
+      font-size: 0.72rem;
+      font-weight: 700;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      text-align: center;
+      padding: 0.25rem;
+      line-height: 1.1;
+    }
+
+    .avatar-button:hover .avatar-overlay,
+    .avatar-button:focus-visible .avatar-overlay {
+      opacity: 1;
+    }
+
+    .avatar-input {
+      display: none;
     }
 
     .user-info h1 { margin: 0; font-size: 1.6rem; font-weight: 800; color: #f8fafc; }
@@ -310,10 +379,12 @@ import { clearJwt } from '../../utils/auth-utils';
 export class ProfileComponent implements OnInit {
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  @ViewChild('avatarInput') avatarInput?: ElementRef<HTMLInputElement>;
 
   user: any = null;
   stats: any = { gamesPlayed: 0, highestScore: 0, totalScore: 0, averageScore: 0 };
   recentResults: any[] = [];
+  uploadingAvatar = false;
 
   // MFA
   qrCode = '';
@@ -333,6 +404,57 @@ export class ProfileComponent implements OnInit {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${localStorage.getItem('jwt') || ''}`
     };
+  }
+
+  openAvatarPicker() {
+    this.avatarInput?.nativeElement.click();
+  }
+
+  async onAvatarSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
+    if (!allowedTypes.includes(file.type)) {
+      this.showAlert('Solo se permiten imágenes JPEG, PNG, WEBP, GIF o AVIF.', 'error');
+      input.value = '';
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      this.showAlert('La imagen no puede superar 5 MB.', 'error');
+      input.value = '';
+      return;
+    }
+
+    this.uploadingAvatar = true;
+    this.cdr.detectChanges();
+
+    try {
+      const res = await fetch(`${this.apiUrl}/api/profile/avatar`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('jwt') || ''}`,
+          'Content-Type': file.type,
+        },
+        body: file,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'No se pudo subir la imagen');
+
+      if (this.user) {
+        this.user.avatarUrl = data.url;
+      }
+
+      this.showAlert('Foto de perfil actualizada correctamente.', 'success');
+    } catch (err: any) {
+      this.showAlert(err.message || 'Error al subir la imagen', 'error');
+    } finally {
+      this.uploadingAvatar = false;
+      input.value = '';
+      this.cdr.detectChanges();
+    }
   }
 
   async ngOnInit() {
