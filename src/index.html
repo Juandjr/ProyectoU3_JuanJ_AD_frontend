@@ -8,6 +8,12 @@
   <meta name="description" content="Juego multiplayer en tiempo real. Colecciona recursos y compite con otros jugadores.">
   <meta name="theme-color" content="#667eea">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script>
+    window.__env = window.__env || {};
+    window.__env.API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:3000'
+      : 'https://proyectou3adbackend.vercel.app';
+  </script>
   
   <!-- Estilos globales -->
   <style>
