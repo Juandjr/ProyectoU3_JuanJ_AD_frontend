@@ -9,6 +9,7 @@ import { StartScreenComponent } from './components/start-screen/start-screen.com
 import { GameCanvasComponent } from './components/game-canvas/game-canvas.component';
 import { ScoreboardComponent } from './components/scoreboard/scoreboard.component';
 import { ProfileComponent } from './components/profile/profile.component';
+import { PaymentCompleteComponent } from './components/payment-complete/payment-complete.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -24,5 +25,6 @@ export const routes: Routes = [
   { path: 'scoreboard', component: ScoreboardComponent, canActivate: [authGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
   { path: 'store', loadComponent: () => import('./components/store/store.component').then(m => m.StoreComponent), canActivate: [authGuard] },
+  { path: 'payment/complete', component: PaymentCompleteComponent },
   { path: '**', redirectTo: '/login' }
 ];
