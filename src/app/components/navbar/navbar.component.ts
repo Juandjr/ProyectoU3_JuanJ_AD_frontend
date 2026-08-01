@@ -211,7 +211,7 @@ export class NavbarComponent {
   private router = inject(Router);
   private gameSocket = inject(GameSocketService);
   username = '';
-  backendOptions = getPresetOptions();
+  backendOptions = getPresetOptions() as Array<{ value: 'vercel' | 'render'; label: string; url: string }>;
   backendPreset = getBackendPreset();
   backendLabel = getBackendLabel();
 
