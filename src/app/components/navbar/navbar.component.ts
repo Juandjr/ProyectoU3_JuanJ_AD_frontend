@@ -211,7 +211,7 @@ export class NavbarComponent {
   private router = inject(Router);
   private gameSocket = inject(GameSocketService);
   username = '';
-  backendOptions = getPresetOptions() as Array<{ value: 'vercel' | 'render'; label: string; url: string }>;
+  backendOptions = getPresetOptions() as Array<{ value: 'vercel' | 'render' | 'railway'; label: string; url: string }>;
   backendPreset = getBackendPreset();
   backendLabel = getBackendLabel();
 
@@ -234,7 +234,7 @@ export class NavbarComponent {
     }
   }
 
-  switchBackend(preset: 'vercel' | 'render'): void {
+  switchBackend(preset: 'vercel' | 'render' | 'railway'): void {
     setBackendPreset(preset);
     this.gameSocket.disconnect();
     this.backendPreset = getBackendPreset();
