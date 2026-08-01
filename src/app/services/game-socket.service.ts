@@ -62,6 +62,10 @@ export class GameSocketService {
     return this.socket?.id || '';
   }
 
+  getRawSocket(): Socket | null {
+    return this.socket || null;
+  }
+
   getRooms(): Promise<any[]> {
     return new Promise((resolve) => {
       if (!this.socket) this.connect();

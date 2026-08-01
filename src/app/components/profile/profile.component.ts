@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { clearJwt } from '../../utils/auth-utils';
+import { LatencyLoggerService, LatencyTestResult } from '../../services/latency-logger.service';
 
 @Component({
   selector: 'app-profile',
@@ -131,8 +132,26 @@ import { clearJwt } from '../../utils/auth-utils';
                 />
                 <button class="btn btn-mfa-confirm" (click)="confirmMfa()">Confirmar</button>
                 <button class="btn btn-cancel" (click)="cancelSetup()">Cancelar</button>
-              </div>
             </div>
+          </div>
+        </div>
+
+        <div class="mfa-section">
+          <h2 class="section-title">Latency Test</h2>
+          <div class="mfa-card">
+            <p class="mfa-desc">
+              Ejecuta una prueba manual de Socket.io para comparar entorno local vs producciÃ³n y descargar el JSON.
+            </p>
+            <div class="mfa-confirm-row" style="margin-top: 1rem;">
+              <button class="btn btn-mfa-enable" [disabled]="latencyRunning" (click)="runLatencyTest()">
+                {{ latencyRunning ? 'Ejecutando...' : 'Ejecutar prueba' }}
+              </button>
+              <button *ngIf="latencyLastResult" class="btn btn-cancel" (click)="downloadLastLatencyResult()">
+                Descargar JSON
+              </button>
+            </div>
+            <pre *ngIf="latencyLastResult" style="margin-top:1rem; white-space:pre-wrap; color:#a2b4c1;">{{ latencyLastResult.summary }}</pre>
+          </div>
         </div>
 
       </div>
@@ -379,6 +398,7 @@ import { clearJwt } from '../../utils/auth-utils';
 export class ProfileComponent implements OnInit {
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private latencyLogger = inject(LatencyLoggerService);
   @ViewChild('avatarInput') avatarInput?: ElementRef<HTMLInputElement>;
 
   user: any = null;
@@ -394,6 +414,8 @@ export class ProfileComponent implements OnInit {
   // Alert
   alertMsg = '';
   alertType: 'success' | 'error' = 'success';
+  latencyRunning = false;
+  latencyLastResult: LatencyTestResult | null = null;
 
   get apiUrl(): string {
     return (window as any).__env?.API_URL || 'http://localhost:3000';
@@ -530,6 +552,32 @@ export class ProfileComponent implements OnInit {
     }
   }
 
+  async runLatencyTest() {
+    this.latencyRunning = true;
+    this.cdr.detectChanges();
+
+    try {
+      const environment = this.detectEnvironment();
+      this.latencyLastResult = await this.latencyLogger.runLatencyTest({
+        totalPings: 100,
+        intervalMs: 200,
+        timeoutMs: 5000,
+        environment
+      });
+      this.showAlert('Prueba de latencia completada.', 'success');
+    } catch (err: any) {
+      this.showAlert(err?.message || 'No se pudo ejecutar la prueba de latencia', 'error');
+    } finally {
+      this.latencyRunning = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  downloadLastLatencyResult() {
+    if (!this.latencyLastResult) return;
+    this.latencyLogger.exportResultAsJson(this.latencyLastResult);
+  }
+
   cancelSetup() {
     this.qrCode = '';
     this.manualKey = '';
@@ -550,5 +598,10 @@ export class ProfileComponent implements OnInit {
       this.alertMsg = '';
       this.cdr.detectChanges();
     }, 5000);
+  }
+
+  private detectEnvironment(): 'local' | 'produccion' {
+    const host = window.location.hostname.toLowerCase();
+    return (host === 'localhost' || host === '127.0.0.1') ? 'local' : 'produccion';
   }
 }
