@@ -7,7 +7,7 @@ const PRESET_URLS: Record<'vercel' | 'render' | 'railway', string> = {
   vercel: (window as any).__env?.API_URL || 'http://localhost:3000',
   render: 'https://proyectou3-juanj-ad-backend.onrender.com'
   ,
-  railway: 'https://proyectou3juanjadbackend.railway.internal'
+  railway: 'https://proyectou3juanjadbackend-production.up.railway.app'
 };
 
 export function getBackendPreset(): BackendPreset {
