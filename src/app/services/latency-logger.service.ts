@@ -9,7 +9,7 @@ export interface LatencySample {
   sentAt: number;
   receivedAt: number | null;
   rttMs: number | null;
-  status: 'ok' | 'timeout' | 'disconnected' | 'aborted';
+  status: 'ok' | 'timeout' | 'disconnected' | 'reconnected';
 }
 
 export interface LatencyStatistics {
@@ -27,6 +27,7 @@ export interface LatencyTestResult {
   isoDate: string;
   samples: LatencySample[];
   statistics: LatencyStatistics;
+  interruptedSamples: number;
   config: {
     totalPings: number;
     intervalMs: number;
@@ -37,9 +38,7 @@ export interface LatencyTestResult {
   abortReason: string | null;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class LatencyLoggerService {
   private readonly gameSocket = inject(GameSocketService);
 
@@ -57,20 +56,47 @@ export class LatencyLoggerService {
     this.gameSocket.connect();
 
     const samples: LatencySample[] = [];
-    let aborted = false;
-    let abortReason: string | null = null;
+    let sawDisconnect = false;
+    let lastDisconnectReason: string | null = null;
 
     for (let sequence = 1; sequence <= totalPings; sequence += 1) {
-      const socket = this.gameSocket.getRawSocket();
+      let socket = this.gameSocket.getRawSocket();
+
       if (!socket || !socket.connected) {
-        aborted = true;
-        abortReason = 'Socket desconectado antes de iniciar la siguiente muestra.';
-        break;
+        sawDisconnect = true;
+        lastDisconnectReason = 'Socket desconectado antes de iniciar la siguiente muestra.';
+        console.warn('[LatencyTest] ' + lastDisconnectReason);
+
+        this.gameSocket.connect();
+        socket = this.gameSocket.getRawSocket();
+
+        if (!socket || !socket.connected) {
+          samples.push({
+            sequence,
+            sentAt: performance.now(),
+            receivedAt: null,
+            rttMs: null,
+            status: 'disconnected'
+          });
+
+          if (sequence < totalPings && intervalMs > 0) {
+            await this.sleep(intervalMs);
+          }
+          continue;
+        }
+
+        samples.push({
+          sequence,
+          sentAt: performance.now(),
+          receivedAt: performance.now(),
+          rttMs: 0,
+          status: 'reconnected'
+        });
       }
 
       try {
         const sentAt = performance.now();
-        const response = await this.sendPing(socket, sequence, sentAt, timeoutMs);
+        await this.sendPing(socket, sequence, sentAt, timeoutMs);
         const receivedAt = performance.now();
 
         samples.push({
@@ -80,8 +106,6 @@ export class LatencyLoggerService {
           rttMs: receivedAt - sentAt,
           status: 'ok'
         });
-
-        // The echoed payload is intentionally transparent; RTT is measured locally.
       } catch (err: any) {
         const message = String(err?.message || err || '');
         const isDisconnect = message.toLowerCase().includes('disconnect') || message.toLowerCase().includes('transport close');
@@ -94,15 +118,17 @@ export class LatencyLoggerService {
           status: isDisconnect ? 'disconnected' : 'timeout'
         });
 
-        aborted = isDisconnect;
-        abortReason = isDisconnect
-          ? `La conexión se cerró durante la prueba: ${message}`
+        sawDisconnect = sawDisconnect || isDisconnect;
+        lastDisconnectReason = isDisconnect
+          ? `La conexion se cerró durante la prueba: ${message}`
           : `Timeout esperando pongTest: ${message}`;
 
         if (isDisconnect) {
           console.warn('[LatencyTest] Socket desconectado durante la medición.', { message });
-          break;
         }
+
+        this.gameSocket.disconnect();
+        this.gameSocket.connect();
       }
 
       if (sequence < totalPings && intervalMs > 0) {
@@ -111,15 +137,17 @@ export class LatencyLoggerService {
     }
 
     const statistics = this.calculateStatistics(samples);
+    const interruptedSamples = samples.filter(sample => sample.status !== 'ok').length;
     const result: LatencyTestResult = {
       environment,
       isoDate: new Date().toISOString(),
       samples,
       statistics,
+      interruptedSamples,
       config: { totalPings, intervalMs, timeoutMs },
-      summary: this.buildSummary(environment, statistics, samples, aborted, abortReason),
-      aborted,
-      abortReason
+      summary: this.buildSummary(environment, statistics, samples, sawDisconnect, lastDisconnectReason),
+      aborted: sawDisconnect,
+      abortReason: lastDisconnectReason
     };
 
     this.printSummary(result);
@@ -161,9 +189,11 @@ export class LatencyLoggerService {
     doc.text('Resumen ejecutivo', margin, y);
     y += 6;
     doc.setFont('helvetica', 'normal');
+
     const summaryLines = [
       `Entorno: ${result.environment}`,
       `Muestras válidas: ${result.statistics.count}/${result.samples.length}`,
+      `Muestras interrumpidas: ${result.interruptedSamples}`,
       `Promedio: ${result.statistics.average} ms`,
       `Mediana: ${result.statistics.median} ms`,
       `P95: ${result.statistics.p95} ms`,
@@ -171,6 +201,7 @@ export class LatencyLoggerService {
       `Mínimo: ${result.statistics.min} ms`,
       `Máximo: ${result.statistics.max} ms`
     ];
+
     summaryLines.forEach(line => {
       doc.text(`- ${line}`, margin, y);
       y += 5.6;
@@ -193,7 +224,7 @@ export class LatencyLoggerService {
     y += 6;
     doc.setFont('helvetica', 'normal');
     const note = result.aborted && result.abortReason
-      ? `La medición terminó antes de completar todas las muestras: ${result.abortReason}`
+      ? `La medición terminó con eventos de conexión intermitente: ${result.abortReason}`
       : 'La medición terminó correctamente sin interrupciones.';
     doc.text(this.wrapText(note, 90), margin, y);
 
@@ -274,20 +305,22 @@ export class LatencyLoggerService {
     environment: LatencyEnvironment,
     statistics: LatencyStatistics,
     samples: LatencySample[],
-    aborted: boolean,
+    hadDisconnect: boolean,
     abortReason: string | null
   ): string {
     const okCount = samples.filter(sample => sample.status === 'ok').length;
+    const interruptedCount = samples.filter(sample => sample.status !== 'ok').length;
     return [
       `[LatencyTest] Entorno: ${environment}`,
       `[LatencyTest] Muestras válidas: ${okCount}/${samples.length}`,
+      `[LatencyTest] Muestras interrumpidas: ${interruptedCount}`,
       `[LatencyTest] Promedio: ${statistics.average} ms`,
       `[LatencyTest] Mediana: ${statistics.median} ms`,
       `[LatencyTest] P95: ${statistics.p95} ms`,
       `[LatencyTest] Desviación estándar: ${statistics.stdDev} ms`,
       `[LatencyTest] Mínimo: ${statistics.min} ms`,
       `[LatencyTest] Máximo: ${statistics.max} ms`,
-      aborted && abortReason ? `[LatencyTest] Prueba detenida: ${abortReason}` : '[LatencyTest] Prueba completada correctamente.'
+      hadDisconnect && abortReason ? `[LatencyTest] Se detectaron eventos de conexión: ${abortReason}` : '[LatencyTest] Prueba completada correctamente.'
     ].join('\n');
   }
 
@@ -336,8 +369,8 @@ export class LatencyLoggerService {
     const plotHeight = height - 10;
     const plotWidth = width - 8;
     const barGap = 1;
-    const barWidth = Math.max(1, plotWidth / Math.min(values.length, 40) - barGap);
     const visibleValues = values.slice(0, 40);
+    const barWidth = Math.max(1, plotWidth / Math.min(visibleValues.length, 40) - barGap);
     const originX = x + 4;
     const originY = y + height - 4;
 
