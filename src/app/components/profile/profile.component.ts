@@ -149,6 +149,9 @@ import { LatencyLoggerService, LatencyTestResult } from '../../services/latency-
               <button *ngIf="latencyLastResult" class="btn btn-cancel" (click)="downloadLastLatencyResult()">
                 Descargar JSON
               </button>
+              <button *ngIf="latencyLastResult" class="btn btn-cancel" (click)="downloadLastLatencyPdf()">
+                Descargar PDF
+              </button>
             </div>
             <pre *ngIf="latencyLastResult" style="margin-top:1rem; white-space:pre-wrap; color:#a2b4c1;">{{ latencyLastResult.summary }}</pre>
           </div>
@@ -576,6 +579,11 @@ export class ProfileComponent implements OnInit {
   downloadLastLatencyResult() {
     if (!this.latencyLastResult) return;
     this.latencyLogger.exportResultAsJson(this.latencyLastResult);
+  }
+
+  downloadLastLatencyPdf() {
+    if (!this.latencyLastResult) return;
+    this.latencyLogger.exportResultAsPdf(this.latencyLastResult);
   }
 
   cancelSetup() {

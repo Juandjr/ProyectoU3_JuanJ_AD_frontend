@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { jsPDF } from 'jspdf';
 import { GameSocketService } from './game-socket.service';
 
 export type LatencyEnvironment = 'local' | 'produccion';
@@ -136,6 +137,70 @@ export class LatencyLoggerService {
     URL.revokeObjectURL(url);
   }
 
+  exportResultAsPdf(result: LatencyTestResult): void {
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 14;
+
+    doc.setTextColor(20, 28, 38);
+    doc.setFillColor(15, 23, 42);
+    doc.rect(0, 0, pageWidth, 28, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.text('Latency Report - Socket.io', margin, 16);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Generado: ${result.isoDate}`, margin, 23);
+
+    let y = 38;
+    doc.setTextColor(20, 28, 38);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Resumen ejecutivo', margin, y);
+    y += 6;
+    doc.setFont('helvetica', 'normal');
+    const summaryLines = [
+      `Entorno: ${result.environment}`,
+      `Muestras válidas: ${result.statistics.count}/${result.samples.length}`,
+      `Promedio: ${result.statistics.average} ms`,
+      `Mediana: ${result.statistics.median} ms`,
+      `P95: ${result.statistics.p95} ms`,
+      `Desviación estándar: ${result.statistics.stdDev} ms`,
+      `Mínimo: ${result.statistics.min} ms`,
+      `Máximo: ${result.statistics.max} ms`
+    ];
+    summaryLines.forEach(line => {
+      doc.text(`- ${line}`, margin, y);
+      y += 5.6;
+    });
+
+    y += 2;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Gráfica de RTT por muestra', margin, y);
+    y += 5;
+    this.drawRttChart(doc, result, margin, y, pageWidth - margin * 2, 62);
+    y += 72;
+
+    if (y > pageHeight - 40) {
+      doc.addPage();
+      y = 20;
+    }
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Observaciones', margin, y);
+    y += 6;
+    doc.setFont('helvetica', 'normal');
+    const note = result.aborted && result.abortReason
+      ? `La medición terminó antes de completar todas las muestras: ${result.abortReason}`
+      : 'La medición terminó correctamente sin interrupciones.';
+    doc.text(this.wrapText(note, 90), margin, y);
+
+    const fileName = `latency-${result.environment}-${this.toFileNameStamp(result.isoDate)}.pdf`;
+    doc.save(fileName);
+  }
+
   private sendPing(socket: any, sequence: number, sentAt: number, timeoutMs: number): Promise<{ sequence: number; clientTimestamp: number }> {
     return new Promise((resolve, reject) => {
       let settled = false;
@@ -250,5 +315,63 @@ export class LatencyLoggerService {
 
   private toFileNameStamp(isoDate: string): string {
     return isoDate.replace(/[:.]/g, '-');
+  }
+
+  private drawRttChart(doc: jsPDF, result: LatencyTestResult, x: number, y: number, width: number, height: number): void {
+    const values = result.samples
+      .filter(sample => typeof sample.rttMs === 'number')
+      .map(sample => sample.rttMs as number);
+
+    doc.setDrawColor(210, 218, 230);
+    doc.setLineWidth(0.2);
+    doc.rect(x, y, width, height);
+
+    if (values.length === 0) {
+      doc.text('No hay muestras válidas para graficar.', x + 4, y + 10);
+      return;
+    }
+
+    const max = Math.max(...values);
+    const min = Math.min(...values);
+    const plotHeight = height - 10;
+    const plotWidth = width - 8;
+    const barGap = 1;
+    const barWidth = Math.max(1, plotWidth / Math.min(values.length, 40) - barGap);
+    const visibleValues = values.slice(0, 40);
+    const originX = x + 4;
+    const originY = y + height - 4;
+
+    doc.setFontSize(7);
+    doc.setTextColor(90, 99, 112);
+    doc.text(`min ${this.round(min)} ms`, x + 4, y + 6);
+    doc.text(`max ${this.round(max)} ms`, x + width - 24, y + 6);
+
+    visibleValues.forEach((value, index) => {
+      const normalized = max === 0 ? 0 : value / max;
+      const barHeight = Math.max(1, normalized * plotHeight);
+      const barX = originX + index * (barWidth + barGap);
+      const barY = originY - barHeight;
+      doc.setFillColor(125, 211, 252);
+      doc.rect(barX, barY, barWidth, barHeight, 'F');
+    });
+  }
+
+  private wrapText(text: string, maxChars: number): string[] {
+    const words = text.split(' ');
+    const lines: string[] = [];
+    let current = '';
+
+    words.forEach(word => {
+      const next = current ? `${current} ${word}` : word;
+      if (next.length > maxChars) {
+        if (current) lines.push(current);
+        current = word;
+      } else {
+        current = next;
+      }
+    });
+
+    if (current) lines.push(current);
+    return lines;
   }
 }
