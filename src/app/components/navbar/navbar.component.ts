@@ -2,6 +2,8 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { GameSocketService } from '../../services/game-socket.service';
+import { getBackendLabel, getBackendPreset, getPresetOptions, setBackendPreset } from '../../utils/backend-config';
 
 @Component({
   selector: 'app-navbar',
@@ -32,6 +34,19 @@ import { filter } from 'rxjs/operators';
         </a>
       </div>
       <div class="navbar-actions">
+        <div class="backend-switch">
+          <span class="backend-label">Backend</span>
+          <button
+            *ngFor="let option of backendOptions"
+            class="backend-pill"
+            [class.active]="backendPreset === option.value"
+            (click)="switchBackend(option.value)"
+            [title]="option.url"
+          >
+            {{ option.label }}
+          </button>
+        </div>
+        <span class="backend-current">{{ backendLabel }}</span>
         <span class="username-badge" *ngIf="username">{{ username }}</span>
         <button class="btn-logout" (click)="logout()">
           <span>🚪</span> Salir
@@ -116,6 +131,50 @@ import { filter } from 'rxjs/operators';
       gap: 0.75rem;
     }
 
+    .backend-switch {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.4rem;
+      border: 1px solid rgba(127,255,212,0.15);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .backend-label {
+      color: #a2b4c1;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-right: 0.2rem;
+    }
+
+    .backend-pill {
+      border: 1px solid rgba(162,180,193,0.2);
+      background: transparent;
+      color: #a2b4c1;
+      border-radius: 999px;
+      padding: 0.3rem 0.7rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .backend-pill.active {
+      background: rgba(127,255,212,0.12);
+      color: #7fffd4;
+      border-color: rgba(127,255,212,0.35);
+    }
+
+    .backend-current {
+      color: #7fffd4;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.3rem 0.55rem;
+      border-radius: 999px;
+      background: rgba(127,255,212,0.08);
+      border: 1px solid rgba(127,255,212,0.2);
+    }
+
     .username-badge {
       font-size: 0.85rem;
       color: #7fffd4;
@@ -150,7 +209,11 @@ import { filter } from 'rxjs/operators';
 })
 export class NavbarComponent {
   private router = inject(Router);
+  private gameSocket = inject(GameSocketService);
   username = '';
+  backendOptions = getPresetOptions();
+  backendPreset = getBackendPreset();
+  backendLabel = getBackendLabel();
 
   constructor() {
     this.loadUsername();
@@ -169,6 +232,14 @@ export class NavbarComponent {
     } catch {
       this.username = '';
     }
+  }
+
+  switchBackend(preset: 'vercel' | 'render'): void {
+    setBackendPreset(preset);
+    this.gameSocket.disconnect();
+    this.backendPreset = getBackendPreset();
+    this.backendLabel = getBackendLabel();
+    this.router.navigate(['/login']);
   }
 
   logout() {

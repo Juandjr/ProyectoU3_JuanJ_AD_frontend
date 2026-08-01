@@ -2,6 +2,7 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { clearJwt } from '../../utils/auth-utils';
+import { getBackendBaseUrl } from '../../utils/backend-config';
 
 @Component({
   selector: 'app-store',
@@ -290,7 +291,7 @@ export class StoreComponent implements OnInit {
   ];
 
   get apiUrl(): string {
-    return (window as any).__env?.API_URL || 'http://localhost:3000';
+    return getBackendBaseUrl();
   }
 
   get headers(): Record<string, string> {

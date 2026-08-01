@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { getBackendBaseUrl } from '../../utils/backend-config';
 
 @Component({
   selector: 'app-forgot-password',
@@ -56,9 +57,8 @@ export class ForgotPasswordComponent {
 
     try {
       this.isSubmitting = true;
-      const apiUrl = (window as any).__env?.API_URL || 'http://localhost:3000';
       const frontendUrl = window.location.origin;
-      const res = await fetch(`${apiUrl}/api/auth/forgot-password`, {
+      const res = await fetch(`${getBackendBaseUrl()}/api/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: this.email, frontendUrl })
@@ -82,9 +82,8 @@ export class ForgotPasswordComponent {
 
     try {
       this.isSubmitting = true;
-      const apiUrl = (window as any).__env?.API_URL || 'http://localhost:3000';
       const frontendUrl = window.location.origin;
-      const res = await fetch(`${apiUrl}/api/auth/forgot-password`, {
+      const res = await fetch(`${getBackendBaseUrl()}/api/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: this.email, frontendUrl })

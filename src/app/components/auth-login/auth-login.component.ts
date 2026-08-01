@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { clearJwt } from '../../utils/auth-utils';
 import { GameSocketService } from '../../services/game-socket.service';
+import { getBackendBaseUrl } from '../../utils/backend-config';
 
 @Component({
   selector: 'app-auth-login',
@@ -43,8 +44,7 @@ export class AuthLoginComponent implements AfterViewInit {
     }
 
     try {
-      const apiUrl = (window as any).__env?.API_URL || 'http://localhost:3000';
-      const configRes = await fetch(`${apiUrl}/api/auth/config`);
+      const configRes = await fetch(`${getBackendBaseUrl()}/api/auth/config`);
       if (!configRes.ok) throw new Error('No se pudo cargar la configuración de Google OAuth');
       const config = await configRes.json();
       const clientId = config.clientId;
@@ -75,8 +75,7 @@ export class AuthLoginComponent implements AfterViewInit {
   async handleGoogleCredential(response: any) {
     const idToken = response.credential;
     try {
-      const apiUrl = (window as any).__env?.API_URL || 'http://localhost:3000';
-      const res = await fetch(`${apiUrl}/api/auth/google`, {
+      const res = await fetch(`${getBackendBaseUrl()}/api/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idToken })
@@ -104,8 +103,7 @@ export class AuthLoginComponent implements AfterViewInit {
     }
 
     try {
-      const apiUrl = (window as any).__env?.API_URL || 'http://localhost:3000';
-      const res = await fetch(`${apiUrl}/api/auth/login`, {
+      const res = await fetch(`${getBackendBaseUrl()}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: this.username, password: this.password })

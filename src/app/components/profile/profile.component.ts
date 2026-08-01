@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { clearJwt } from '../../utils/auth-utils';
 import { LatencyLoggerService, LatencyTestResult } from '../../services/latency-logger.service';
+import { getBackendBaseUrl } from '../../utils/backend-config';
 
 @Component({
   selector: 'app-profile',
@@ -421,7 +422,7 @@ export class ProfileComponent implements OnInit {
   latencyLastResult: LatencyTestResult | null = null;
 
   get apiUrl(): string {
-    return (window as any).__env?.API_URL || 'http://localhost:3000';
+    return getBackendBaseUrl();
   }
 
   get headers(): Record<string, string> {

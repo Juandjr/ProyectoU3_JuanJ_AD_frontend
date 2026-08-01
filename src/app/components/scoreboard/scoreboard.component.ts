@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { clearJwt } from '../../utils/auth-utils';
+import { getBackendBaseUrl } from '../../utils/backend-config';
 
 @Component({
   selector: 'app-scoreboard',
@@ -36,9 +37,8 @@ export class ScoreboardComponent implements OnInit {
     this.entries = [];
 
     try {
-      const apiUrl = (window as any).__env?.API_URL || 'http://localhost:3000';
       const token = localStorage.getItem('jwt');
-      const res = await fetch(`${apiUrl}/api/scoreboard?difficulty=${this.selectedDifficulty}`, {
+      const res = await fetch(`${getBackendBaseUrl()}/api/scoreboard?difficulty=${this.selectedDifficulty}`, {
         headers: {
           Authorization: token ? `Bearer ${token}` : ''
         }

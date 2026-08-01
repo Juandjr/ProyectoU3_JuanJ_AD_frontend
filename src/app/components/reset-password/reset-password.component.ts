@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { getBackendBaseUrl } from '../../utils/backend-config';
 
 @Component({
   selector: 'app-reset-password',
@@ -54,8 +55,7 @@ export class ResetPasswordComponent {
 
     try {
       this.isSubmitting = true;
-      const apiUrl = (window as any).__env?.API_URL || 'http://localhost:3000';
-      const res = await fetch(`${apiUrl}/api/auth/reset-password`, {
+      const res = await fetch(`${getBackendBaseUrl()}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: this.email, token: this.token, newPassword: this.password })

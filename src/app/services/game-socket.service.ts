@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Socket, io } from 'socket.io-client';
 import { Observable } from 'rxjs';
 import { clearJwt, isJwtExpiringSoon, isJwtValid } from '../utils/auth-utils';
+import { getBackendBaseUrl } from '../utils/backend-config';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +14,7 @@ export class GameSocketService {
   private connected = false;
   private refreshTimerId: number | null = null;
   private currentToken: string | null = null;
+  private currentBaseUrl: string | null = null;
   private router = inject(Router);
 
   connect(): void {
@@ -24,7 +26,9 @@ export class GameSocketService {
       return;
     }
 
-    if (this.socket && this.socket.connected && this.currentToken === token) {
+    const url = getBackendBaseUrl();
+
+    if (this.socket && this.socket.connected && this.currentToken === token && this.currentBaseUrl === url) {
       return;
     }
 
@@ -32,9 +36,9 @@ export class GameSocketService {
       this.disconnect();
     }
 
-    const url = (window as any).__env?.API_URL || 'http://localhost:3000';
     this.socket = io(url, { auth: { token } });
     this.currentToken = token;
+    this.currentBaseUrl = url;
     this.connected = true;
 
     this.socket.on('connect', () => {
@@ -199,7 +203,7 @@ export class GameSocketService {
   private async refreshToken(): Promise<boolean> {
     const token = localStorage.getItem('jwt');
     if (!token) return false;
-    const url = (window as any).__env?.API_URL || 'http://localhost:3000';
+    const url = getBackendBaseUrl();
 
     try {
       const res = await fetch(`${url}/api/auth/refresh`, {
@@ -261,7 +265,7 @@ export class GameSocketService {
 
   submitResult(score: number, difficulty: string = 'MEDIUM'): Promise<any> {
     const token = localStorage.getItem('jwt');
-    const url = (window as any).__env?.API_URL || 'http://localhost:3000';
+    const url = getBackendBaseUrl();
     return fetch(`${url}/api/scoreboard`, {
       method: 'POST',
       headers: {
@@ -280,6 +284,7 @@ export class GameSocketService {
       try { this.socket.disconnect(); } catch (e) { /* ignore */ }
       this.socket = undefined as any;
       this.currentToken = null;
+      this.currentBaseUrl = null;
       this.connected = false;
       this.stopTokenRefreshLoop();
     }

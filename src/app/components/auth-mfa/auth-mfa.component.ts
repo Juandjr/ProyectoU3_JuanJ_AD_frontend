@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { clearJwt } from '../../utils/auth-utils';
+import { getBackendBaseUrl } from '../../utils/backend-config';
 
 @Component({
   selector: 'app-auth-mfa',
@@ -189,8 +190,7 @@ export class AuthMfaComponent {
     }
 
     try {
-      const apiUrl = (window as any).__env?.API_URL || 'http://localhost:3000';
-      const res = await fetch(`${apiUrl}/api/auth/mfa/verify`, {
+      const res = await fetch(`${getBackendBaseUrl()}/api/auth/mfa/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: this.email, code: this.code })

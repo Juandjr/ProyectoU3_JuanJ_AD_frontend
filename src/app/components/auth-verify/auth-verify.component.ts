@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { getBackendBaseUrl } from '../../utils/backend-config';
 
 @Component({
   selector: 'app-auth-verify',
@@ -60,8 +61,7 @@ export class AuthVerifyComponent {
     if (!this.email || !this.code) return this.showAlert('Por favor, ingresa tu correo y el código recibido.', 'error');
     try {
       this.isSubmitting = true;
-      const apiUrl = (window as any).__env?.API_URL || 'http://localhost:3000';
-      const res = await fetch(`${apiUrl}/api/auth/verify-code`, {
+      const res = await fetch(`${getBackendBaseUrl()}/api/auth/verify-code`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: this.email, code: this.code })
@@ -84,8 +84,7 @@ export class AuthVerifyComponent {
     this.resendDisabled = true;
     this.resendText = 'Enviando...';
     try {
-      const apiUrl = (window as any).__env?.API_URL || 'http://localhost:3000';
-      const res = await fetch(`${apiUrl}/api/auth/resend-code`, {
+      const res = await fetch(`${getBackendBaseUrl()}/api/auth/resend-code`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: this.email })
