@@ -3,39 +3,62 @@ import { jsPDF } from 'jspdf';
 import { GameSocketService } from './game-socket.service';
 
 export type LatencyEnvironment = 'local' | 'produccion';
+export type LatencyProvider = 'Vercel' | 'Railway' | 'Render';
 
 export interface LatencySample {
   sequence: number;
-  sentAt: number;
-  receivedAt: number | null;
-  rttMs: number | null;
   status: 'ok' | 'timeout' | 'disconnected' | 'reconnected';
+  tSend: number;
+  tRecv: number | null;
+  rttMs: number | null;
 }
 
 export interface LatencyStatistics {
-  count: number;
-  average: number;
-  median: number;
-  p95: number;
-  stdDev: number;
-  min: number;
-  max: number;
+  avgLatencyMs: number;
+  p95LatencyMs: number;
+  stdDevMs: number;
+}
+
+export interface LatencyRunMetadata {
+  provider: LatencyProvider;
+  runNumber: number;
+  timestamp: string;
+  totalAttempted: number;
+  validSamples: number;
+  interruptedSamples: number;
+  interruptionRatePercent: number;
+  runAborted: boolean;
+  config: {
+    intervalMs: number;
+    timeoutMs: number;
+  };
+}
+
+export interface LatencyRunExport {
+  metadata: LatencyRunMetadata;
+  stats: LatencyStatistics;
+  samples: LatencySample[];
 }
 
 export interface LatencyTestResult {
   environment: LatencyEnvironment;
+  provider: LatencyProvider;
+  runNumber: number;
   isoDate: string;
   samples: LatencySample[];
-  statistics: LatencyStatistics;
+  stats: LatencyStatistics;
+  totalAttempted: number;
+  validSamples: number;
   interruptedSamples: number;
+  interruptionRatePercent: number;
+  aborted: boolean;
+  abortReason: string | null;
   config: {
     totalPings: number;
     intervalMs: number;
     timeoutMs: number;
   };
   summary: string;
-  aborted: boolean;
-  abortReason: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -47,25 +70,30 @@ export class LatencyLoggerService {
     intervalMs?: number;
     timeoutMs?: number;
     environment?: LatencyEnvironment;
+    provider?: LatencyProvider;
+    runNumber?: number;
   }): Promise<LatencyTestResult> {
     const totalPings = Math.max(1, Math.floor(options?.totalPings ?? 100));
     const intervalMs = Math.max(0, Math.floor(options?.intervalMs ?? 200));
     const timeoutMs = Math.max(250, Math.floor(options?.timeoutMs ?? 5000));
     const environment = options?.environment ?? this.detectEnvironment();
+    const provider = options?.provider ?? this.detectProvider();
+    const runNumber = Math.max(1, Math.floor(options?.runNumber ?? 1));
 
     this.gameSocket.connect();
 
     const samples: LatencySample[] = [];
     let sawDisconnect = false;
-    let lastDisconnectReason: string | null = null;
+    let lastAbortReason: string | null = null;
 
     for (let sequence = 1; sequence <= totalPings; sequence += 1) {
+      const sentAt = performance.now();
       let socket = this.gameSocket.getRawSocket();
 
       if (!socket || !socket.connected) {
         sawDisconnect = true;
-        lastDisconnectReason = 'Socket desconectado antes de iniciar la siguiente muestra.';
-        console.warn('[LatencyTest] ' + lastDisconnectReason);
+        lastAbortReason = 'Socket desconectado antes de iniciar la siguiente muestra.';
+        console.warn('[LatencyTest] ' + lastAbortReason);
 
         this.gameSocket.connect();
         socket = this.gameSocket.getRawSocket();
@@ -73,10 +101,10 @@ export class LatencyLoggerService {
         if (!socket || !socket.connected) {
           samples.push({
             sequence,
-            sentAt: performance.now(),
-            receivedAt: null,
-            rttMs: null,
-            status: 'disconnected'
+            status: 'disconnected',
+            tSend: sentAt,
+            tRecv: null,
+            rttMs: null
           });
 
           if (sequence < totalPings && intervalMs > 0) {
@@ -87,24 +115,23 @@ export class LatencyLoggerService {
 
         samples.push({
           sequence,
-          sentAt: performance.now(),
-          receivedAt: performance.now(),
-          rttMs: 0,
-          status: 'reconnected'
+          status: 'reconnected',
+          tSend: sentAt,
+          tRecv: null,
+          rttMs: null
         });
       }
 
       try {
-        const sentAt = performance.now();
         await this.sendPing(socket, sequence, sentAt, timeoutMs);
-        const receivedAt = performance.now();
+        const tRecv = performance.now();
 
         samples.push({
           sequence,
-          sentAt,
-          receivedAt,
-          rttMs: receivedAt - sentAt,
-          status: 'ok'
+          status: 'ok',
+          tSend: sentAt,
+          tRecv,
+          rttMs: this.round(tRecv - sentAt)
         });
       } catch (err: any) {
         const message = String(err?.message || err || '');
@@ -112,14 +139,14 @@ export class LatencyLoggerService {
 
         samples.push({
           sequence,
-          sentAt: performance.now(),
-          receivedAt: null,
-          rttMs: null,
-          status: isDisconnect ? 'disconnected' : 'timeout'
+          status: isDisconnect ? 'disconnected' : 'timeout',
+          tSend: sentAt,
+          tRecv: null,
+          rttMs: null
         });
 
         sawDisconnect = sawDisconnect || isDisconnect;
-        lastDisconnectReason = isDisconnect
+        lastAbortReason = isDisconnect
           ? `La conexion se cerró durante la prueba: ${message}`
           : `Timeout esperando pongTest: ${message}`;
 
@@ -136,33 +163,58 @@ export class LatencyLoggerService {
       }
     }
 
-    const statistics = this.calculateStatistics(samples);
+    const validSamples = samples.filter(sample => sample.status === 'ok' && typeof sample.rttMs === 'number' && Number.isFinite(sample.rttMs)).length;
     const interruptedSamples = samples.filter(sample => sample.status !== 'ok').length;
+    const interruptionRatePercent = totalPings === 0 ? 0 : this.round((interruptedSamples / totalPings) * 100);
+    const stats = this.calculateStatistics(samples);
+
     const result: LatencyTestResult = {
       environment,
+      provider,
+      runNumber,
       isoDate: new Date().toISOString(),
       samples,
-      statistics,
+      stats,
+      totalAttempted: totalPings,
+      validSamples,
       interruptedSamples,
-      config: { totalPings, intervalMs, timeoutMs },
-      summary: this.buildSummary(environment, statistics, samples, sawDisconnect, lastDisconnectReason),
+      interruptionRatePercent,
       aborted: sawDisconnect,
-      abortReason: lastDisconnectReason
+      abortReason: lastAbortReason,
+      config: { totalPings, intervalMs, timeoutMs },
+      summary: this.buildSummary(environment, provider, runNumber, stats, validSamples, interruptedSamples, interruptionRatePercent, sawDisconnect, lastAbortReason)
     };
 
     this.printSummary(result);
     return result;
   }
 
+  exportRawRunJSON(result: LatencyTestResult): void {
+    const payload: LatencyRunExport = {
+      metadata: {
+        provider: result.provider,
+        runNumber: result.runNumber,
+        timestamp: result.isoDate,
+        totalAttempted: result.totalAttempted,
+        validSamples: result.validSamples,
+        interruptedSamples: result.interruptedSamples,
+        interruptionRatePercent: result.interruptionRatePercent,
+        runAborted: result.aborted,
+        config: {
+          intervalMs: result.config.intervalMs,
+          timeoutMs: result.config.timeoutMs
+        }
+      },
+      stats: result.stats,
+      samples: result.samples
+    };
+
+    const fileName = `${this.toFileNameSlug(result.provider)}_run${result.runNumber}_raw.json`;
+    this.downloadJson(payload, fileName);
+  }
+
   exportResultAsJson(result: LatencyTestResult): void {
-    const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json;charset=utf-8' });
-    const fileName = `latency-${result.environment}-${this.toFileNameStamp(result.isoDate)}.json`;
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = fileName;
-    anchor.click();
-    URL.revokeObjectURL(url);
+    this.exportRawRunJSON(result);
   }
 
   exportResultAsPdf(result: LatencyTestResult): void {
@@ -191,15 +243,13 @@ export class LatencyLoggerService {
     doc.setFont('helvetica', 'normal');
 
     const summaryLines = [
+      `Proveedor: ${result.provider}`,
       `Entorno: ${result.environment}`,
-      `Muestras válidas: ${result.statistics.count}/${result.samples.length}`,
+      `Muestras válidas: ${result.validSamples}/${result.samples.length}`,
       `Muestras interrumpidas: ${result.interruptedSamples}`,
-      `Promedio: ${result.statistics.average} ms`,
-      `Mediana: ${result.statistics.median} ms`,
-      `P95: ${result.statistics.p95} ms`,
-      `Desviación estándar: ${result.statistics.stdDev} ms`,
-      `Mínimo: ${result.statistics.min} ms`,
-      `Máximo: ${result.statistics.max} ms`
+      `Promedio: ${result.stats.avgLatencyMs} ms`,
+      `P95: ${result.stats.p95LatencyMs} ms`,
+      `Desviación estándar: ${result.stats.stdDevMs} ms`
     ];
 
     summaryLines.forEach(line => {
@@ -228,7 +278,7 @@ export class LatencyLoggerService {
       : 'La medición terminó correctamente sin interrupciones.';
     doc.text(this.wrapText(note, 90), margin, y);
 
-    const fileName = `latency-${result.environment}-${this.toFileNameStamp(result.isoDate)}.pdf`;
+    const fileName = `${this.toFileNameSlug(result.provider)}_run${result.runNumber}.pdf`;
     doc.save(fileName);
   }
 
@@ -266,28 +316,23 @@ export class LatencyLoggerService {
 
   private calculateStatistics(samples: LatencySample[]): LatencyStatistics {
     const values = samples
-      .filter(sample => typeof sample.rttMs === 'number' && Number.isFinite(sample.rttMs))
+      .filter(sample => sample.status === 'ok' && typeof sample.rttMs === 'number' && Number.isFinite(sample.rttMs))
       .map(sample => sample.rttMs as number)
       .sort((a, b) => a - b);
 
     if (values.length === 0) {
-      return { count: 0, average: 0, median: 0, p95: 0, stdDev: 0, min: 0, max: 0 };
+      return { avgLatencyMs: 0, p95LatencyMs: 0, stdDevMs: 0 };
     }
 
     const sum = values.reduce((acc, value) => acc + value, 0);
     const average = sum / values.length;
-    const median = this.percentile(values, 50);
     const p95 = this.percentile(values, 95);
     const variance = values.reduce((acc, value) => acc + ((value - average) ** 2), 0) / values.length;
 
     return {
-      count: values.length,
-      average: this.round(average),
-      median: this.round(median),
-      p95: this.round(p95),
-      stdDev: this.round(Math.sqrt(variance)),
-      min: this.round(values[0]),
-      max: this.round(values[values.length - 1])
+      avgLatencyMs: this.round(average),
+      p95LatencyMs: this.round(p95),
+      stdDevMs: this.round(Math.sqrt(variance))
     };
   }
 
@@ -303,23 +348,25 @@ export class LatencyLoggerService {
 
   private buildSummary(
     environment: LatencyEnvironment,
-    statistics: LatencyStatistics,
-    samples: LatencySample[],
+    provider: LatencyProvider,
+    runNumber: number,
+    stats: LatencyStatistics,
+    validSamples: number,
+    interruptedSamples: number,
+    interruptionRatePercent: number,
     hadDisconnect: boolean,
     abortReason: string | null
   ): string {
-    const okCount = samples.filter(sample => sample.status === 'ok').length;
-    const interruptedCount = samples.filter(sample => sample.status !== 'ok').length;
     return [
+      `[LatencyTest] Proveedor: ${provider}`,
       `[LatencyTest] Entorno: ${environment}`,
-      `[LatencyTest] Muestras válidas: ${okCount}/${samples.length}`,
-      `[LatencyTest] Muestras interrumpidas: ${interruptedCount}`,
-      `[LatencyTest] Promedio: ${statistics.average} ms`,
-      `[LatencyTest] Mediana: ${statistics.median} ms`,
-      `[LatencyTest] P95: ${statistics.p95} ms`,
-      `[LatencyTest] Desviación estándar: ${statistics.stdDev} ms`,
-      `[LatencyTest] Mínimo: ${statistics.min} ms`,
-      `[LatencyTest] Máximo: ${statistics.max} ms`,
+      `[LatencyTest] Corrida: ${runNumber}`,
+      `[LatencyTest] Muestras válidas: ${validSamples}`,
+      `[LatencyTest] Muestras interrumpidas: ${interruptedSamples}`,
+      `[LatencyTest] Tasa de interrupción: ${interruptionRatePercent}%`,
+      `[LatencyTest] Promedio: ${stats.avgLatencyMs} ms`,
+      `[LatencyTest] P95: ${stats.p95LatencyMs} ms`,
+      `[LatencyTest] Desviación estándar: ${stats.stdDevMs} ms`,
       hadDisconnect && abortReason ? `[LatencyTest] Se detectaron eventos de conexión: ${abortReason}` : '[LatencyTest] Prueba completada correctamente.'
     ].join('\n');
   }
@@ -338,21 +385,41 @@ export class LatencyLoggerService {
     return (host === 'localhost' || host === '127.0.0.1') ? 'local' : 'produccion';
   }
 
+  private detectProvider(): LatencyProvider {
+    const host = window.location.hostname.toLowerCase();
+    if (host.includes('railway')) return 'Railway';
+    if (host.includes('render')) return 'Render';
+    return 'Vercel';
+  }
+
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => window.setTimeout(resolve, ms));
   }
 
   private round(value: number): number {
-    return Math.round(value * 1000) / 1000;
+    return Math.round(value * 100) / 100;
   }
 
-  private toFileNameStamp(isoDate: string): string {
-    return isoDate.replace(/[:.]/g, '-');
+  private toFileNameSlug(value: string): string {
+    return value.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+  }
+
+  private downloadJson(payload: unknown, fileName: string): void {
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = fileName;
+    anchor.rel = 'noopener';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
   }
 
   private drawRttChart(doc: jsPDF, result: LatencyTestResult, x: number, y: number, width: number, height: number): void {
     const values = result.samples
-      .filter(sample => typeof sample.rttMs === 'number')
+      .filter(sample => sample.status === 'ok' && typeof sample.rttMs === 'number' && Number.isFinite(sample.rttMs))
       .map(sample => sample.rttMs as number);
 
     doc.setDrawColor(210, 218, 230);

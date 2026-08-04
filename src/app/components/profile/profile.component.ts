@@ -147,7 +147,7 @@ import { getBackendBaseUrl } from '../../utils/backend-config';
               <button class="btn btn-mfa-enable" [disabled]="latencyRunning" (click)="runLatencyTest()">
                 {{ latencyRunning ? 'Ejecutando...' : 'Ejecutar prueba' }}
               </button>
-              <button *ngIf="latencyLastResult" class="btn btn-cancel" (click)="downloadLastLatencyResult()">
+              <button *ngIf="latencyLastResult" class="btn btn-cancel" (click)="downloadLastLatencyRawJSON()">
                 Descargar JSON
               </button>
               <button *ngIf="latencyLastResult" class="btn btn-cancel" (click)="downloadLastLatencyPdf()">
@@ -577,9 +577,9 @@ export class ProfileComponent implements OnInit {
     }
   }
 
-  downloadLastLatencyResult() {
+  downloadLastLatencyRawJSON() {
     if (!this.latencyLastResult) return;
-    this.latencyLogger.exportResultAsJson(this.latencyLastResult);
+    this.latencyLogger.exportRawRunJSON(this.latencyLastResult);
   }
 
   downloadLastLatencyPdf() {
