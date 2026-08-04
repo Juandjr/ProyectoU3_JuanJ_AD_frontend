@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { jsPDF } from 'jspdf';
 import { GameSocketService } from './game-socket.service';
+import { getBackendLabel } from '../utils/backend-config';
 
 export type LatencyEnvironment = 'local' | 'produccion';
 export type LatencyProvider = 'Vercel' | 'Railway' | 'Render';
@@ -386,9 +387,9 @@ export class LatencyLoggerService {
   }
 
   private detectProvider(): LatencyProvider {
-    const host = window.location.hostname.toLowerCase();
-    if (host.includes('railway')) return 'Railway';
-    if (host.includes('render')) return 'Render';
+    const backendLabel = getBackendLabel();
+    if (backendLabel === 'Railway') return 'Railway';
+    if (backendLabel === 'Render') return 'Render';
     return 'Vercel';
   }
 
