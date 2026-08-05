@@ -47,5 +47,5 @@ De acuerdo con las evidencias consolidadas en esta carpeta, las correcciones pri
 - consolidar resultados crudos y reportes visuales por cada ejecución;
 - ajustar la presentación de los reportes comparativos finales;
 - generar gráficas de latencia, estabilidad e interrupciones para evidenciar el comportamiento de cada hosting;
-- preparar una versión final del documento con iteraciones hasta obtener el reporte de comparación definitivo.
+- preparar una versión final del documento con iteraciones hasta obtener el reporte de comparación definitivo
 
