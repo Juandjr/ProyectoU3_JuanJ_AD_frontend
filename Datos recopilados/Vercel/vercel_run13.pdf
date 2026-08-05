@@ -1,0 +1,376 @@
+%PDF-1.3
+%ºß¬à
+3 0 obj
+<</Type /Page
+/Parent 1 0 R
+/Resources 2 0 R
+/MediaBox [0 0 595.2799999999999727 841.8899999999999864]
+/Contents 4 0 R
+>>
+endobj
+4 0 obj
+<<
+/Length 3330
+>>
+stream
+0.5670000000000001 w
+0 G
+0.06 0.09 0.16 rg
+0. 841.8899999999999864 595.2799999999999727 -79.3700787401574814 re
+f
+BT
+/F2 18 Tf
+20.6999999999999993 TL
+1. g
+39.6850393700787407 796.5356692913385359 Td
+(Latency Report - Socket.io) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+1. g
+39.6850393700787407 776.69314960629913 Td
+(Generado: 2026-08-04T17:07:59.443Z) Tj
+ET
+BT
+/F2 11 Tf
+12.6499999999999986 TL
+0.078 0.11 0.149 rg
+39.6850393700787407 734.1734645669291695 Td
+(Resumen ejecutivo) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0.078 0.11 0.149 rg
+39.6850393700787407 717.1655905511811397 Td
+(- Proveedor: Vercel) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0.078 0.11 0.149 rg
+39.6850393700787407 701.291574803149615 Td
+(- Entorno: produccion) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0.078 0.11 0.149 rg
+39.6850393700787407 685.4175590551180903 Td
+(- Muestras válidas: 10/100) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0.078 0.11 0.149 rg
+39.6850393700787407 669.5435433070865656 Td
+(- Muestras interrumpidas: 90) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0.078 0.11 0.149 rg
+39.6850393700787407 653.6695275590550409 Td
+(- Promedio: 725.51 ms) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0.078 0.11 0.149 rg
+39.6850393700787407 637.7955118110235162 Td
+(- P95: 858.36 ms) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0.078 0.11 0.149 rg
+39.6850393700787407 621.9214960629921052 Td
+(- Desviación estándar: 101.35 ms) Tj
+ET
+BT
+/F2 11 Tf
+12.6499999999999986 TL
+0.078 0.11 0.149 rg
+39.6850393700787407 600.3781889763779418 Td
+(Gráfica de RTT por muestra) Tj
+ET
+0.82 0.85 0.9 RG
+0.5669291338582678 w
+39.6850393700787407 586.2049606299212883 515.9099212598424629 -175.748031496063021 re
+S
+BT
+/F2 7 Tf
+8.0499999999999989 TL
+0.353 0.388 0.439 rg
+51.0236220472441033 569.1970866141732586 Td
+(min 475.9 ms) Tj
+ET
+BT
+/F2 7 Tf
+8.0499999999999989 TL
+0.353 0.388 0.439 rg
+487.5634645669290421 569.1970866141732586 Td
+(max 859.3 ms) Tj
+ET
+0.49 0.83 0.99 rg
+51.0236220472441033 569.1970866141732586 46.4886299212598288 -147.4015748031496287 re
+f
+0.49 0.83 0.99 rg
+100.3468976377952657 568.8368593279093375 46.4886299212598288 -147.0413475168856792 re
+f
+0.49 0.83 0.99 rg
+149.6701732283464423 545.748005646419756 46.4886299212598288 -123.9524938353961829 re
+f
+0.49 0.83 0.99 rg
+198.9934488188975763 541.0822046052866199 46.4886299212598288 -119.2866927942630753 re
+f
+0.49 0.83 0.99 rg
+248.3167244094487671 546.8973022264046904 46.4886299212598288 -125.1017904153811457 re
+f
+0.49 0.83 0.99 rg
+297.6399999999999864 544.1698670589777294 46.4886299212598288 -122.3743552479540853 re
+f
+0.49 0.83 0.99 rg
+346.9632755905511203 553.6558522639285229 46.4886299212598288 -131.8603404529048646 re
+f
+0.49 0.83 0.99 rg
+396.2865511811022543 550.2422698845699642 46.4886299212598288 -128.4467580735463912 re
+f
+0.49 0.83 0.99 rg
+445.6098267716534451 539.2124534527737296 46.4886299212598288 -117.4169416417501708 re
+f
+0.49 0.83 0.99 rg
+494.9331023622046359 503.4298763505544798 46.4886299212598288 -81.6343645395309068 re
+f
+BT
+/F2 7 Tf
+8.0499999999999989 TL
+0.353 0.388 0.439 rg
+39.6850393700787407 382.110472440944875 Td
+(Observaciones) Tj
+ET
+BT
+/F1 7 Tf
+8.0499999999999989 TL
+0.353 0.388 0.439 rg
+39.6850393700787407 365.1025984251968453 Td
+(La medición terminó con eventos de conexión intermitente: Socket desconectado antes de) Tj
+T* (iniciar la siguiente muestra.) Tj
+ET
+endstream
+endobj
+1 0 obj
+<</Type /Pages
+/Kids [3 0 R ]
+/Count 1
+>>
+endobj
+5 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+6 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+7 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-Oblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+8 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-BoldOblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+9 0 obj
+<<
+/Type /Font
+/BaseFont /Courier
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+10 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+11 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-Oblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+12 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-BoldOblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+13 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Roman
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+14 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+15 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Italic
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+16 0 obj
+<<
+/Type /Font
+/BaseFont /Times-BoldItalic
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+17 0 obj
+<<
+/Type /Font
+/BaseFont /ZapfDingbats
+/Subtype /Type1
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+18 0 obj
+<<
+/Type /Font
+/BaseFont /Symbol
+/Subtype /Type1
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+2 0 obj
+<<
+/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]
+/Font <<
+/F1 5 0 R
+/F2 6 0 R
+/F3 7 0 R
+/F4 8 0 R
+/F5 9 0 R
+/F6 10 0 R
+/F7 11 0 R
+/F8 12 0 R
+/F9 13 0 R
+/F10 14 0 R
+/F11 15 0 R
+/F12 16 0 R
+/F13 17 0 R
+/F14 18 0 R
+>>
+/XObject <<
+>>
+>>
+endobj
+19 0 obj
+<<
+/Producer (jsPDF 4.2.1)
+/CreationDate (D:20260804120806-05'00')
+>>
+endobj
+20 0 obj
+<<
+/Type /Catalog
+/Pages 1 0 R
+/OpenAction [3 0 R /FitH null]
+/PageLayout /OneColumn
+>>
+endobj
+xref
+0 21
+0000000000 65535 f 
+0000003534 00000 n 
+0000005351 00000 n 
+0000000015 00000 n 
+0000000152 00000 n 
+0000003591 00000 n 
+0000003716 00000 n 
+0000003846 00000 n 
+0000003979 00000 n 
+0000004116 00000 n 
+0000004239 00000 n 
+0000004368 00000 n 
+0000004500 00000 n 
+0000004636 00000 n 
+0000004764 00000 n 
+0000004891 00000 n 
+0000005020 00000 n 
+0000005153 00000 n 
+0000005255 00000 n 
+0000005599 00000 n 
+0000005685 00000 n 
+trailer
+<<
+/Size 21
+/Root 20 0 R
+/Info 19 0 R
+/ID [ <CDDA889DE99E5EC0482146D955C28CFA> <CDDA889DE99E5EC0482146D955C28CFA> ]
+>>
+startxref
+5789
+%%EOF
