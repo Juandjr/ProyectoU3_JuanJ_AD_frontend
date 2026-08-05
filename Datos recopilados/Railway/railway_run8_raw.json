@@ -1,0 +1,723 @@
+{
+  "metadata": {
+    "provider": "Railway",
+    "runNumber": 8,
+    "timestamp": "2026-08-04T18:43:17.806Z",
+    "totalAttempted": 100,
+    "validSamples": 100,
+    "interruptedSamples": 0,
+    "interruptionRatePercent": 0,
+    "runAborted": false,
+    "config": {
+      "intervalMs": 200,
+      "timeoutMs": 5000
+    }
+  },
+  "stats": {
+    "avgLatencyMs": 145.38,
+    "p95LatencyMs": 148.32,
+    "stdDevMs": 2.47
+  },
+  "samples": [
+    {
+      "sequence": 1,
+      "status": "ok",
+      "tSend": 392455.19999999925,
+      "tRecv": 392599.69999999925,
+      "rttMs": 144.5
+    },
+    {
+      "sequence": 2,
+      "status": "ok",
+      "tSend": 392808.80000000075,
+      "tRecv": 392954.19999999925,
+      "rttMs": 145.4
+    },
+    {
+      "sequence": 3,
+      "status": "ok",
+      "tSend": 393168.80000000075,
+      "tRecv": 393313.4000000004,
+      "rttMs": 144.6
+    },
+    {
+      "sequence": 4,
+      "status": "ok",
+      "tSend": 393518.9000000004,
+      "tRecv": 393663.19999999925,
+      "rttMs": 144.3
+    },
+    {
+      "sequence": 5,
+      "status": "ok",
+      "tSend": 393878.9000000004,
+      "tRecv": 394023.4000000004,
+      "rttMs": 144.5
+    },
+    {
+      "sequence": 6,
+      "status": "ok",
+      "tSend": 394238.5999999996,
+      "tRecv": 394383.19999999925,
+      "rttMs": 144.6
+    },
+    {
+      "sequence": 7,
+      "status": "ok",
+      "tSend": 394598.5,
+      "tRecv": 394743.30000000075,
+      "rttMs": 144.8
+    },
+    {
+      "sequence": 8,
+      "status": "ok",
+      "tSend": 394958.69999999925,
+      "tRecv": 395103.0999999996,
+      "rttMs": 144.4
+    },
+    {
+      "sequence": 9,
+      "status": "ok",
+      "tSend": 395307.9000000004,
+      "tRecv": 395452.0999999996,
+      "rttMs": 144.2
+    },
+    {
+      "sequence": 10,
+      "status": "ok",
+      "tSend": 395658.5,
+      "tRecv": 395803.5999999996,
+      "rttMs": 145.1
+    },
+    {
+      "sequence": 11,
+      "status": "ok",
+      "tSend": 396008.5999999996,
+      "tRecv": 396152.69999999925,
+      "rttMs": 144.1
+    },
+    {
+      "sequence": 12,
+      "status": "ok",
+      "tSend": 396368.80000000075,
+      "tRecv": 396515,
+      "rttMs": 146.2
+    },
+    {
+      "sequence": 13,
+      "status": "ok",
+      "tSend": 396718.5,
+      "tRecv": 396863,
+      "rttMs": 144.5
+    },
+    {
+      "sequence": 14,
+      "status": "ok",
+      "tSend": 397078.4000000004,
+      "tRecv": 397222.5999999996,
+      "rttMs": 144.2
+    },
+    {
+      "sequence": 15,
+      "status": "ok",
+      "tSend": 397428.19999999925,
+      "tRecv": 397573.9000000004,
+      "rttMs": 145.7
+    },
+    {
+      "sequence": 16,
+      "status": "ok",
+      "tSend": 397788.80000000075,
+      "tRecv": 397933.5,
+      "rttMs": 144.7
+    },
+    {
+      "sequence": 17,
+      "status": "ok",
+      "tSend": 398138.5999999996,
+      "tRecv": 398283.19999999925,
+      "rttMs": 144.6
+    },
+    {
+      "sequence": 18,
+      "status": "ok",
+      "tSend": 398488.9000000004,
+      "tRecv": 398633.19999999925,
+      "rttMs": 144.3
+    },
+    {
+      "sequence": 19,
+      "status": "ok",
+      "tSend": 398838.80000000075,
+      "tRecv": 398985.30000000075,
+      "rttMs": 146.5
+    },
+    {
+      "sequence": 20,
+      "status": "ok",
+      "tSend": 399188.69999999925,
+      "tRecv": 399333.19999999925,
+      "rttMs": 144.5
+    },
+    {
+      "sequence": 21,
+      "status": "ok",
+      "tSend": 399538.5,
+      "tRecv": 399682.5,
+      "rttMs": 144
+    },
+    {
+      "sequence": 22,
+      "status": "ok",
+      "tSend": 399898.69999999925,
+      "tRecv": 400043.19999999925,
+      "rttMs": 144.5
+    },
+    {
+      "sequence": 23,
+      "status": "ok",
+      "tSend": 400248.5999999996,
+      "tRecv": 400393.69999999925,
+      "rttMs": 145.1
+    },
+    {
+      "sequence": 24,
+      "status": "ok",
+      "tSend": 400608.9000000004,
+      "tRecv": 400752.80000000075,
+      "rttMs": 143.9
+    },
+    {
+      "sequence": 25,
+      "status": "ok",
+      "tSend": 400958.80000000075,
+      "tRecv": 401103,
+      "rttMs": 144.2
+    },
+    {
+      "sequence": 26,
+      "status": "ok",
+      "tSend": 401314,
+      "tRecv": 401458.0999999996,
+      "rttMs": 144.1
+    },
+    {
+      "sequence": 27,
+      "status": "ok",
+      "tSend": 401664.0999999996,
+      "tRecv": 401808.19999999925,
+      "rttMs": 144.1
+    },
+    {
+      "sequence": 28,
+      "status": "ok",
+      "tSend": 402018.80000000075,
+      "tRecv": 402163.4000000004,
+      "rttMs": 144.6
+    },
+    {
+      "sequence": 29,
+      "status": "ok",
+      "tSend": 402368.4000000004,
+      "tRecv": 402512.80000000075,
+      "rttMs": 144.4
+    },
+    {
+      "sequence": 30,
+      "status": "ok",
+      "tSend": 402728.9000000004,
+      "tRecv": 402874,
+      "rttMs": 145.1
+    },
+    {
+      "sequence": 31,
+      "status": "ok",
+      "tSend": 403088.69999999925,
+      "tRecv": 403233.5,
+      "rttMs": 144.8
+    },
+    {
+      "sequence": 32,
+      "status": "ok",
+      "tSend": 403448.80000000075,
+      "tRecv": 403593.5,
+      "rttMs": 144.7
+    },
+    {
+      "sequence": 33,
+      "status": "ok",
+      "tSend": 403804,
+      "tRecv": 403953.30000000075,
+      "rttMs": 149.3
+    },
+    {
+      "sequence": 34,
+      "status": "ok",
+      "tSend": 404158.5,
+      "tRecv": 404302.5999999996,
+      "rttMs": 144.1
+    },
+    {
+      "sequence": 35,
+      "status": "ok",
+      "tSend": 404518.69999999925,
+      "tRecv": 404663.80000000075,
+      "rttMs": 145.1
+    },
+    {
+      "sequence": 36,
+      "status": "ok",
+      "tSend": 404868.69999999925,
+      "tRecv": 405029.69999999925,
+      "rttMs": 161
+    },
+    {
+      "sequence": 37,
+      "status": "ok",
+      "tSend": 405248.80000000075,
+      "tRecv": 405392.9000000004,
+      "rttMs": 144.1
+    },
+    {
+      "sequence": 38,
+      "status": "ok",
+      "tSend": 405608.30000000075,
+      "tRecv": 405752.9000000004,
+      "rttMs": 144.6
+    },
+    {
+      "sequence": 39,
+      "status": "ok",
+      "tSend": 405958.69999999925,
+      "tRecv": 406103.5,
+      "rttMs": 144.8
+    },
+    {
+      "sequence": 40,
+      "status": "ok",
+      "tSend": 406308.5999999996,
+      "tRecv": 406452.9000000004,
+      "rttMs": 144.3
+    },
+    {
+      "sequence": 41,
+      "status": "ok",
+      "tSend": 406668.4000000004,
+      "tRecv": 406812.69999999925,
+      "rttMs": 144.3
+    },
+    {
+      "sequence": 42,
+      "status": "ok",
+      "tSend": 407028.4000000004,
+      "tRecv": 407173.69999999925,
+      "rttMs": 145.3
+    },
+    {
+      "sequence": 43,
+      "status": "ok",
+      "tSend": 407384.0999999996,
+      "tRecv": 407528.4000000004,
+      "rttMs": 144.3
+    },
+    {
+      "sequence": 44,
+      "status": "ok",
+      "tSend": 407748.5999999996,
+      "tRecv": 407895.5,
+      "rttMs": 146.9
+    },
+    {
+      "sequence": 45,
+      "status": "ok",
+      "tSend": 408098.80000000075,
+      "tRecv": 408243.19999999925,
+      "rttMs": 144.4
+    },
+    {
+      "sequence": 46,
+      "status": "ok",
+      "tSend": 408458.5,
+      "tRecv": 408603.9000000004,
+      "rttMs": 145.4
+    },
+    {
+      "sequence": 47,
+      "status": "ok",
+      "tSend": 408828.5999999996,
+      "tRecv": 408981.9000000004,
+      "rttMs": 153.3
+    },
+    {
+      "sequence": 48,
+      "status": "ok",
+      "tSend": 409198.5,
+      "tRecv": 409342.9000000004,
+      "rttMs": 144.4
+    },
+    {
+      "sequence": 49,
+      "status": "ok",
+      "tSend": 409548.69999999925,
+      "tRecv": 409693.4000000004,
+      "rttMs": 144.7
+    },
+    {
+      "sequence": 50,
+      "status": "ok",
+      "tSend": 409894.0999999996,
+      "tRecv": 410038.5,
+      "rttMs": 144.4
+    },
+    {
+      "sequence": 51,
+      "status": "ok",
+      "tSend": 410248.4000000004,
+      "tRecv": 410395.69999999925,
+      "rttMs": 147.3
+    },
+    {
+      "sequence": 52,
+      "status": "ok",
+      "tSend": 410598.5,
+      "tRecv": 410743.30000000075,
+      "rttMs": 144.8
+    },
+    {
+      "sequence": 53,
+      "status": "ok",
+      "tSend": 410949.4000000004,
+      "tRecv": 411093.9000000004,
+      "rttMs": 144.5
+    },
+    {
+      "sequence": 54,
+      "status": "ok",
+      "tSend": 411298.80000000075,
+      "tRecv": 411443.30000000075,
+      "rttMs": 144.5
+    },
+    {
+      "sequence": 55,
+      "status": "ok",
+      "tSend": 411658.80000000075,
+      "tRecv": 411803.19999999925,
+      "rttMs": 144.4
+    },
+    {
+      "sequence": 56,
+      "status": "ok",
+      "tSend": 412008.69999999925,
+      "tRecv": 412153.5,
+      "rttMs": 144.8
+    },
+    {
+      "sequence": 57,
+      "status": "ok",
+      "tSend": 412368.4000000004,
+      "tRecv": 412512.80000000075,
+      "rttMs": 144.4
+    },
+    {
+      "sequence": 58,
+      "status": "ok",
+      "tSend": 412718.30000000075,
+      "tRecv": 412877.19999999925,
+      "rttMs": 158.9
+    },
+    {
+      "sequence": 59,
+      "status": "ok",
+      "tSend": 413078.69999999925,
+      "tRecv": 413223.5999999996,
+      "rttMs": 144.9
+    },
+    {
+      "sequence": 60,
+      "status": "ok",
+      "tSend": 413438.5999999996,
+      "tRecv": 413583,
+      "rttMs": 144.4
+    },
+    {
+      "sequence": 61,
+      "status": "ok",
+      "tSend": 413788.80000000075,
+      "tRecv": 413933.80000000075,
+      "rttMs": 145
+    },
+    {
+      "sequence": 62,
+      "status": "ok",
+      "tSend": 414143.80000000075,
+      "tRecv": 414288.69999999925,
+      "rttMs": 144.9
+    },
+    {
+      "sequence": 63,
+      "status": "ok",
+      "tSend": 414498.80000000075,
+      "tRecv": 414643.5,
+      "rttMs": 144.7
+    },
+    {
+      "sequence": 64,
+      "status": "ok",
+      "tSend": 414854.30000000075,
+      "tRecv": 414999.80000000075,
+      "rttMs": 145.5
+    },
+    {
+      "sequence": 65,
+      "status": "ok",
+      "tSend": 415218.4000000004,
+      "tRecv": 415363,
+      "rttMs": 144.6
+    },
+    {
+      "sequence": 66,
+      "status": "ok",
+      "tSend": 415568.5999999996,
+      "tRecv": 415712.9000000004,
+      "rttMs": 144.3
+    },
+    {
+      "sequence": 67,
+      "status": "ok",
+      "tSend": 415918.4000000004,
+      "tRecv": 416063.19999999925,
+      "rttMs": 144.8
+    },
+    {
+      "sequence": 68,
+      "status": "ok",
+      "tSend": 416268.9000000004,
+      "tRecv": 416416.69999999925,
+      "rttMs": 147.8
+    },
+    {
+      "sequence": 69,
+      "status": "ok",
+      "tSend": 416628.80000000075,
+      "tRecv": 416777.0999999996,
+      "rttMs": 148.3
+    },
+    {
+      "sequence": 70,
+      "status": "ok",
+      "tSend": 416978.69999999925,
+      "tRecv": 417124.4000000004,
+      "rttMs": 145.7
+    },
+    {
+      "sequence": 71,
+      "status": "ok",
+      "tSend": 417338.5999999996,
+      "tRecv": 417483.9000000004,
+      "rttMs": 145.3
+    },
+    {
+      "sequence": 72,
+      "status": "ok",
+      "tSend": 417703.5,
+      "tRecv": 417849.9000000004,
+      "rttMs": 146.4
+    },
+    {
+      "sequence": 73,
+      "status": "ok",
+      "tSend": 418058.69999999925,
+      "tRecv": 418203.30000000075,
+      "rttMs": 144.6
+    },
+    {
+      "sequence": 74,
+      "status": "ok",
+      "tSend": 418413.30000000075,
+      "tRecv": 418558.19999999925,
+      "rttMs": 144.9
+    },
+    {
+      "sequence": 75,
+      "status": "ok",
+      "tSend": 418768.5999999996,
+      "tRecv": 418913.4000000004,
+      "rttMs": 144.8
+    },
+    {
+      "sequence": 76,
+      "status": "ok",
+      "tSend": 419128.69999999925,
+      "tRecv": 419274.80000000075,
+      "rttMs": 146.1
+    },
+    {
+      "sequence": 77,
+      "status": "ok",
+      "tSend": 419478.9000000004,
+      "tRecv": 419623.5,
+      "rttMs": 144.6
+    },
+    {
+      "sequence": 78,
+      "status": "ok",
+      "tSend": 419828.69999999925,
+      "tRecv": 419973.4000000004,
+      "rttMs": 144.7
+    },
+    {
+      "sequence": 79,
+      "status": "ok",
+      "tSend": 420188.5999999996,
+      "tRecv": 420333.4000000004,
+      "rttMs": 144.8
+    },
+    {
+      "sequence": 80,
+      "status": "ok",
+      "tSend": 420538.69999999925,
+      "tRecv": 420686.4000000004,
+      "rttMs": 147.7
+    },
+    {
+      "sequence": 81,
+      "status": "ok",
+      "tSend": 420898.5,
+      "tRecv": 421042.80000000075,
+      "rttMs": 144.3
+    },
+    {
+      "sequence": 82,
+      "status": "ok",
+      "tSend": 421248.4000000004,
+      "tRecv": 421393,
+      "rttMs": 144.6
+    },
+    {
+      "sequence": 83,
+      "status": "ok",
+      "tSend": 421608.5999999996,
+      "tRecv": 421753.30000000075,
+      "rttMs": 144.7
+    },
+    {
+      "sequence": 84,
+      "status": "ok",
+      "tSend": 421957.30000000075,
+      "tRecv": 422102,
+      "rttMs": 144.7
+    },
+    {
+      "sequence": 85,
+      "status": "ok",
+      "tSend": 422308.5,
+      "tRecv": 422453.0999999996,
+      "rttMs": 144.6
+    },
+    {
+      "sequence": 86,
+      "status": "ok",
+      "tSend": 422668.69999999925,
+      "tRecv": 422813.4000000004,
+      "rttMs": 144.7
+    },
+    {
+      "sequence": 87,
+      "status": "ok",
+      "tSend": 423028.4000000004,
+      "tRecv": 423175.0999999996,
+      "rttMs": 146.7
+    },
+    {
+      "sequence": 88,
+      "status": "ok",
+      "tSend": 423384,
+      "tRecv": 423528.5,
+      "rttMs": 144.5
+    },
+    {
+      "sequence": 89,
+      "status": "ok",
+      "tSend": 423738.5999999996,
+      "tRecv": 423883.19999999925,
+      "rttMs": 144.6
+    },
+    {
+      "sequence": 90,
+      "status": "ok",
+      "tSend": 424093.30000000075,
+      "tRecv": 424237.0999999996,
+      "rttMs": 143.8
+    },
+    {
+      "sequence": 91,
+      "status": "ok",
+      "tSend": 424438.4000000004,
+      "tRecv": 424583.5999999996,
+      "rttMs": 145.2
+    },
+    {
+      "sequence": 92,
+      "status": "ok",
+      "tSend": 424788.4000000004,
+      "tRecv": 424933.0999999996,
+      "rttMs": 144.7
+    },
+    {
+      "sequence": 93,
+      "status": "ok",
+      "tSend": 425148.5,
+      "tRecv": 425297.0999999996,
+      "rttMs": 148.6
+    },
+    {
+      "sequence": 94,
+      "status": "ok",
+      "tSend": 425498.80000000075,
+      "tRecv": 425643.5999999996,
+      "rttMs": 144.8
+    },
+    {
+      "sequence": 95,
+      "status": "ok",
+      "tSend": 425848.5,
+      "tRecv": 425992.9000000004,
+      "rttMs": 144.4
+    },
+    {
+      "sequence": 96,
+      "status": "ok",
+      "tSend": 426198.4000000004,
+      "tRecv": 426343.19999999925,
+      "rttMs": 144.8
+    },
+    {
+      "sequence": 97,
+      "status": "ok",
+      "tSend": 426558.5,
+      "tRecv": 426702.9000000004,
+      "rttMs": 144.4
+    },
+    {
+      "sequence": 98,
+      "status": "ok",
+      "tSend": 426908.69999999925,
+      "tRecv": 427053.9000000004,
+      "rttMs": 145.2
+    },
+    {
+      "sequence": 99,
+      "status": "ok",
+      "tSend": 427258.4000000004,
+      "tRecv": 427406.5,
+      "rttMs": 148.1
+    },
+    {
+      "sequence": 100,
+      "status": "ok",
+      "tSend": 427628.69999999925,
+      "tRecv": 427773.5,
+      "rttMs": 144.8
+    }
+  ]
+}
